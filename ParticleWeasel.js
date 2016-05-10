@@ -4,7 +4,10 @@
 $(document).ready(function () {
 
 
-
+        var aMaxX = 9;
+        var aMaxY = 0 ;
+        var bMaxX = 0;
+        var bMaxY = 0;
 
 
     //Canvas
@@ -118,6 +121,8 @@ $(document).ready(function () {
     function Particles(lifeTime, speed, x, y, period, color, radius) {
         this.lifeTime = lifeTime;
         this.speed = speed;
+        this.width = radius*2;
+        this.height = radius*2;
         this.x = x;
         this.y = y;
         this.period = period;
@@ -127,31 +132,34 @@ $(document).ready(function () {
         this.draw = function() {
             ctx.strokeStyle = color;
             ctx.beginPath();
-            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
             ctx.stroke();
 
         }
 
         this.update = function() {
-            if (y > 0 && period >= 0) {
-                y -= speed;
-                x += speed * .3;
+            
+            if (this.y > 0 && period >= 0) {
+                this.y -= speed;
+                this.x += speed * .3;
                 period--;
                 if (period == 0) {
                     period = -10;
                 }
-            } else if (y > 0 && period < 0) {
-                y -= speed;
-                x -= speed * .3;
+            } else if (this.y > 0 && period < 0) {
+                this.y -= speed;
+                this.x -= speed * .3;
                 period++;
                 if (period == 0) {
                     period = 10;
                 }
             } else {
-                y = h;
-                x = Math.random() * w;
+                this.y = h;
+                this.x = Math.random() * w;
                 period = 10;
             }
+            
+            
         }
     }
 
@@ -161,11 +169,12 @@ $(document).ready(function () {
                 Math.random()*w, canvas.height, 10, "red",10 ))
         }
     }
+    createObstacles(30);
 
 //----------------------Proton "System"---------------------------------
 //----------------------------------------------------------------------
 
-    Protons =
+    
     function Proton(x, y, speed, color, radius){
         this.x = x;
         this.y = y;
@@ -202,9 +211,16 @@ $(document).ready(function () {
     this.stopped = true;
 
     weasel.update = function() {
+        for(i in partObstacles){
+            if(overlap(this, partObstacles[i])){
+                partObstacles.splice(i,1);
+            }
+        }
+ 
         if (mouseDowned && this.stopped == true) {
             this.stopped = false;
             this.speed = .5;
+            
         }
         this.accel = 1.25;
 
@@ -243,7 +259,8 @@ $(document).ready(function () {
         this.uncenter();
         this.drawChildren();
     }
-
+        
+    
    
 
   
@@ -364,7 +381,7 @@ $(document).ready(function () {
     
     gameScreen.init = function() {
         this.addChild(weasel);
-        createObstacles(50);
+        
         //this.addChild(partObstacles);
     }
     gameScreen.update = function() {
@@ -449,8 +466,8 @@ $(document).ready(function () {
         bMaxX = b.x + b.width;
         bMaxY = b.y + b.height;
         
-        ctx.fillStyle ='red';
-        ctx.fillRect(b.x,b.y,bMaxX,bMaxY);
+        
+                
 
         if (aMaxX < b.x || a.x > bMaxX) return false;
         if (aMaxY < b.y || a.y > bMaxY) return false;
@@ -467,6 +484,11 @@ $(document).ready(function () {
         canvas.width = canvas.width;
 
         screenMan.draw();
+        ctx.fillStyle = "blue";
+        ctx.fillText("aMaxX: " + aMaxX, 5, 10);
+        ctx.fillText("aMaxY: " + aMaxY, 5, 20);
+        ctx.fillText("bMaxX: " + bMaxX, 5, 30);
+        ctx.fillText("bMaxY: " + bMaxY, 5, 40);
     }
 
     //Update function
@@ -475,6 +497,7 @@ $(document).ready(function () {
             mousePos = getMousePos(canvas, event);
         }
         screenMan.update();
+        
         canMove = true;
     }
 
