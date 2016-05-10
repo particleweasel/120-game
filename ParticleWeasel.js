@@ -18,6 +18,15 @@ $(document).ready(function () {
     var pauseMusic = false;
     var highscore = 0;
     
+//----------------------Images----------------------------------
+//-----------------------------------------------------------------------
+    //Source image array
+    var sources = [];
+    sources.push("./images/NewGame.png");
+    sources.push("./images/MainMenu.png");
+    sources.push("./images/ResumeGame.png");
+    sources.push("./images/Seal.png");
+    
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
     
@@ -184,7 +193,7 @@ $(document).ready(function () {
 //----------------------------------------------------------------------
     var weasel = new Sprite();
     weasel.image = new Image();
-    weasel.setSrc("Seal.png");
+    weasel.setSrc(sources[3]);
     weasel.x = canvas.width/2;
     weasel.y = canvas.height/2;
     weasel.center();
@@ -319,11 +328,7 @@ $(document).ready(function () {
     }
 
 
-    //Source image array
-    var sources = [];
-    sources.push("./images/NewGame.png");
-    sources.push("./images/MainMenu.png");
-    sources.push("./images/ResumeGame.png");
+    
 
     var screenMan = new ScreenManager();
 
@@ -334,7 +339,7 @@ $(document).ready(function () {
         var newGame = new Sprite();
         newGame.name = "New Game"
         newGame.image = new Image();
-        newGame.image.src = "NewGame.png";
+        newGame.image.src = sources[1];
         newGame.width = 224;
         newGame.height = 34;
         newGame.x = canvas.width/2;
@@ -355,14 +360,23 @@ $(document).ready(function () {
 //----------------------Menu System Implementaton-----------------------
 //----------------------------------------------------------------------
     var gameScreen = new Screen(false, true);
+    gameScreen.obstacles = new Array();
+    
     gameScreen.init = function() {
         this.addChild(weasel);
-        this.addChild(partObstacles);
+        createObstacles(50);
+        //this.addChild(partObstacles);
     }
     gameScreen.update = function() {
+        for(i in partObstacles){
+            partObstacles[i].update();
+        }
         this.updateChildren();
     }
     gameScreen.draw = function() {
+        for(i in partObstacles){
+            partObstacles[i].draw();
+        }    
         this.drawChildren();
     }
 
@@ -446,7 +460,7 @@ $(document).ready(function () {
 //----------------------Main Update/Draw---------------------------------
 //-----------------------------------------------------------------------
 
-    createObstacles(100);
+
 
     function draw() {
         //Draw Background
