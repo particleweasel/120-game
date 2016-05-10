@@ -83,7 +83,7 @@ Sprite.prototype.uncenter = function() {
 }
 
 Sprite.prototype.draw = function() {
-    //console.log("drawing"+this.image.src);
+    console.log("drawing"+this.image.src);
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     this.drawChildren();
 };
@@ -225,6 +225,7 @@ menu.draw = function() {
 
 
 var weasel = new Sprite();
+weasel.image = new Image();
 weasel.setSrc("Seal.png");
 weasel.x = canvas.width/2;
 weasel.y = canvas.height/2;
@@ -286,6 +287,9 @@ gameScreen.init = function() {
 }
 gameScreen.update = function() {
     this.updateChildren();
+}
+gameScreen.draw = function() {
+    this.drawChildren();
 }
 
 var pauseScreen = new Screen(false, false);
