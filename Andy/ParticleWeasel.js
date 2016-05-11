@@ -242,12 +242,20 @@ $(document).ready(function () {
         for(i in partObstacles){
             partObstacles[i].update();
         }
+        
+        for(i in protonArray){
+            protonArray[i].update();
+        }
         this.updateChildren();
     }
     gameScreen.draw = function() {
-        for(i in partObstacles){
+    for(i in partObstacles){
             partObstacles[i].draw();
-        }    
+        }
+        
+        for(i in protonArray){
+            protonArray[i].draw();
+        } 
         this.drawChildren();
     }
 
@@ -351,29 +359,62 @@ $(document).ready(function () {
 //----------------------Proton "System"---------------------------------
 //----------------------------------------------------------------------
     
-    function Proton(x, y, speed, color, radius){
+    //Could not figure out a way to make them moves towards eacht
+    
+    var protonArray = new Array();
+    protonCount = 1;
+    function Proton(x, y, speed, color, radius, target){
         Sprite.call(this);
         this.x = x;
         this.y = y;
         this.speed = speed;
         this.color = color;
         this.radius = radius;
-
+        this.target = target
         //@todo: Add sprite image?
         this.draw = function () {
             ctx.strokeStyle = color;
             ctx.beginPath();
-            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
             ctx.stroke();
-            this.drawChildren();
+            //this.drawChildren();
         }
 
         this.update = function () {
-
-
-        }
+            if(protonArray.length == 2){
+                this.moveTowards(protonArray[this.target]);
+            }
+        }   
+        
+        this.moveTowards = function (Coord){
+            diffX = Coord.x - this.x;
+            diffY = Coord.y - this.y;
+            console.log("x = " + Coord.x);
+            console.log("y = " + Coord.y);
+	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            this.x += Math.cos(angle * Math.PI/180) * this.speed;
+            this.y += Math.sin(angle * Math.PI/180) * this.speed;
+    
+    }
+	
+	   
 
     }
+    
+    function createProtons(side){
+            if(side == "left"){
+                protonArray.push(new Proton(5, h/2 ,2, "blue", 15, protonCount));
+            }
+            if(side == "right"){
+                protonArray.push(new Proton(w-5, h/2 ,2, "orange", 15, protonCount));
+            }
+            protonCount--;
+        }
+        
+    
+        
+    createProtons("left");
+    createProtons("right");
 
 
     
@@ -406,7 +447,7 @@ $(document).ready(function () {
         diffX = mousePos.x - this.x;
         diffY = mousePos.y - this.y;
 
-        distance = Math.sqrt(diffX^2 + diffY^2)
+        distance = Math.sqrt(diffX^2 + diffY^2);
         
         //Set Max Speed
         if (this.speed > 10) this.speed = 10;
