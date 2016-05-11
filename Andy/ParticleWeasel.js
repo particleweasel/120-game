@@ -513,16 +513,16 @@ $(document).ready(function () {
 
     //Collision using min/max positions
     function overlap(a, b) {
-        aMaxX = a.x + a.width;
-        aMaxY = a.y + a.height;
+        aMaxX = a.x + a.width/2;
+        aMaxY = a.y + a.height/2;
         bMaxX = b.x + b.width;
         bMaxY = b.y + b.height;
         
         
                 
 
-        if (aMaxX < b.x || a.x > bMaxX) return false;
-        if (aMaxY < b.y || a.y > bMaxY) return false;
+        if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
+        if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
 
         return true;
     }
