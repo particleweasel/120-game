@@ -381,20 +381,40 @@ $(document).ready(function () {
         }
 
         this.update = function () {
-            if(protonArray.length == 2){
+            if(weasel.followPower == true){
+                this.moveTowards(weasel);
+            }
+            if(protonArray.length == 2 && weasel.followPower == false){
                 this.moveTowards(protonArray[this.target]);
+            }
+            if(this.overlap(this, protonArray[this.target])){
+                console.log("Protons Collide");
             }
         }   
         
         this.moveTowards = function (Coord){
             diffX = Coord.x - this.x;
             diffY = Coord.y - this.y;
-            console.log("x = " + Coord.x);
-            console.log("y = " + Coord.y);
 	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
             this.x += Math.cos(angle * Math.PI/180) * this.speed;
             this.y += Math.sin(angle * Math.PI/180) * this.speed;
     
+        
+         }
+         
+        this.overlap = function (a, b) {
+            aMaxX = a.x + a.width; 
+            aMaxY = a.y + a.height;
+            bMaxX = b.x + b.width;
+            bMaxY = b.y + b.height;
+            
+            
+                    
+
+            if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
+            if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
+
+            return true;
     }
 	
 	   
@@ -413,6 +433,8 @@ $(document).ready(function () {
         
     
         
+    
+        
     createProtons("left");
     createProtons("right");
 
@@ -428,12 +450,15 @@ $(document).ready(function () {
     weasel.center();
     weasel.speed = .1;
     weasel.accel = 1.25;
-    this.stopped = true;
+    weasel.stopped = true;
+    weasel.numEaten = 0;
+    weasel.followPower = false;
 
     weasel.update = function() {
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
                 partObstacles.splice(i,1);
+                this.numEaten++;
             }
         }
  
@@ -442,6 +467,11 @@ $(document).ready(function () {
             this.speed = .5;
             
         }
+        
+        if(this.numEaten > 2){
+            this.followPower = true;
+        }
+        
         this.accel = 1.25;
 
         diffX = mousePos.x - this.x;
@@ -513,8 +543,8 @@ $(document).ready(function () {
 
     //Collision using min/max positions
     function overlap(a, b) {
-        aMaxX = a.x + a.width/2;
-        aMaxY = a.y + a.height/2;
+        aMaxX = a.x;
+        aMaxY = a.y;
         bMaxX = b.x + b.width;
         bMaxY = b.y + b.height;
         
