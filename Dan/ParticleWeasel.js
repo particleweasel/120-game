@@ -335,7 +335,7 @@ $(document).ready(function () {
     Particle.prototype = new Sprite();
 
     Particle.prototype.update = function() {
-        console.log(this.running);
+        //console.log(this.running);
         if(this.running) {
             this.moveAway(weasel);
         } else this.float();
@@ -355,7 +355,7 @@ $(document).ready(function () {
             diffY = Coord.y - this.y;
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
-	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
             this.x += Math.cos(angle * Math.PI/180) * this.speed;
             this.y += Math.sin(angle * Math.PI/180) * this.speed;
         }
@@ -365,7 +365,7 @@ $(document).ready(function () {
             diffY = Coord.y - this.y;
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
-	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
             this.x += Math.cos(angle * Math.PI/180) * -this.speed;
             this.y += Math.sin(angle * Math.PI/180) * -this.speed;
         }
@@ -406,30 +406,42 @@ $(document).ready(function () {
         }
 
         this.update = function () {
-            if(protonArray.length == 2){
+            if(weasel.followPower == true){
+                this.moveTowards(weasel);
+            }
+            if(protonArray.length == 2 && weasel.followPower == false){
                 this.moveTowards(protonArray[this.target]);
+            }
+            if(this.overlap(this, protonArray[this.target])){
+                console.log("Protons Collide");
             }
         }   
         
         this.moveTowards = function (Coord){
             diffX = Coord.x - this.x;
             diffY = Coord.y - this.y;
-            //console.log("x = " + Coord.x);
-            //console.log("y = " + Coord.y);
 	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
             this.x += Math.cos(angle * Math.PI/180) * this.speed;
             this.y += Math.sin(angle * Math.PI/180) * this.speed;
-        }
+    
         
-        this.moveAway = function (Coord){
-            diffX = Coord.x - this.x;
-            diffY = Coord.y - this.y;
-            //console.log("x = " + Coord.x);
-            //console.log("y = " + Coord.y);
-	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(angle * Math.PI/180) * -this.speed;
-            this.y += Math.sin(angle * Math.PI/180) * -this.speed;
-        }
+         }
+         
+        this.overlap = function (a, b) {
+            aMaxX = a.x + a.width; 
+            aMaxY = a.y + a.height;
+            bMaxX = b.x + b.width;
+            bMaxY = b.y + b.height;
+            
+            
+                    
+
+            if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
+            if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
+
+            return true;
+    }
+	
 	   
 
     }
@@ -443,6 +455,8 @@ $(document).ready(function () {
             }
             protonCount--;
         }
+        
+    
         
     
         
@@ -462,6 +476,8 @@ $(document).ready(function () {
     weasel.speed = .1;
     weasel.accel = 1.25;
     weasel.stopped = true;
+    weasel.numEaten = 0;
+    weasel.followPower = false;
     weasel.forcePush = true;
 
     weasel.update = function() {
@@ -472,10 +488,11 @@ $(document).ready(function () {
                 }
             }
         }
-        
+
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
                 partObstacles.splice(i,1);
+                this.numEaten++;
             }
         }
  
@@ -484,18 +501,19 @@ $(document).ready(function () {
             this.speed = .5;
             
         }
+        
+        if(this.numEaten > 2){
+            this.followPower = true;
+        }
+        
         this.accel = 1.25;
 
         diffX = mousePos.x - this.x;
         diffY = mousePos.y - this.y;
 
-
         
         //Set Max Speed
         if (this.speed > 10) this.speed = 10;
-        
-        //Slow down if getting close, needs image offset
-        //if (distance < 10) this.accel = .75;
         
         //Set Min Speed
         if (this.speed < 2) this.speed = 2;
@@ -517,8 +535,7 @@ $(document).ready(function () {
 
     weasel.draw = function() {
         this.center();
-	ctx.fillRect(this.x, this.y, this.width, this.height);        
-	ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         this.uncenter();
         this.drawChildren();
     }
@@ -569,11 +586,11 @@ $(document).ready(function () {
 
         return true;
     }
-    
+
     function distance(a,b) {
-        console.log("checking distance")
+        //console.log("checking distance")
         var d = Math.sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
-        console.log("Distance: " + d);
+        //console.log("Distance: " + d);
         return d;
     }
 //----------------------Main Update/Draw---------------------------------
