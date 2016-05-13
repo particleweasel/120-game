@@ -388,8 +388,14 @@ $(document).ready(function () {
                 this.moveTowards(protonArray[this.target]);
             }
             if(this.overlap(this, protonArray[this.target])){
-                console.log("Protons Collide");
+                
             }
+			for(i in partObstacles){
+				if(this.overlap(this, partObstacles[i])){
+					console.log("Protons Collide");
+					 ctx.fillText("Collision: " + true, 5, 50);
+				}
+			}
         }   
         
         this.moveTowards = function (Coord){
@@ -403,16 +409,16 @@ $(document).ready(function () {
          }
          
         this.overlap = function (a, b) {
-            aMaxX = a.x + a.width; 
-            aMaxY = a.y + a.height;
-            bMaxX = b.x + b.width;
-            bMaxY = b.y + b.height;
+            aMaxX = a.x; 
+            aMaxY = a.y;
+            bMaxX = b.x;
+            bMaxY = b.y;
             
             
                     
 
-            if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
-            if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
+            if (aMaxX < b.x-a.radius || a.x-a.radius > bMaxX) return false;
+            if (aMaxY < b.y-a.radius || a.y-a.radius > bMaxY) return false;
 
             return true;
     }
