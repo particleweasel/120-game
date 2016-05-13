@@ -60,6 +60,16 @@ $(document).ready(function () {
             y: evt.clientY - rect.top
         };
     }
+	
+//----------------------Game State-----------------------------------
+//-----------------------------------------------------------------------
+	function gameState(){
+		this.onGoing = true;
+		this.win = false;
+		this.lose = false;
+	}
+	state = new gameState();
+	
 //----------------------Sprite Function----------------------------------
 //-----------------------------------------------------------------------
 
@@ -246,16 +256,24 @@ $(document).ready(function () {
         for(i in protonArray){
             protonArray[i].update();
         }
+		
+		for(i in explosion){
+            explosion[i].update();
+        }
         this.updateChildren();
     }
     gameScreen.draw = function() {
-    for(i in partObstacles){
+		for(i in partObstacles){
             partObstacles[i].draw();
         }
         
         for(i in protonArray){
             protonArray[i].draw();
         } 
+		
+		 for(i in  explosion){
+            explosion[i].draw();
+        }
         this.drawChildren();
     }
 
@@ -293,7 +311,7 @@ $(document).ready(function () {
 
     }
     
-//----------------------Obstacle particle system-------------------------
+//----------------------Particle system-------------------------
 //-----------------------------------------------------------------------
     var partObstacles = new Array();
     function Particle(lifeTime, speed, x, y, period, color, radius) {
@@ -357,9 +375,9 @@ $(document).ready(function () {
     createObstacles(30);
 
 //----------------------Proton "System"---------------------------------
-//----------------------------------------------------------------------
+//--------------------------------------------------------------------------
     
-    //Could not figure out a way to make them moves towards eacht
+    
     
     var protonArray = new Array();
     protonCount = 1;
@@ -367,7 +385,7 @@ $(document).ready(function () {
         Sprite.call(this);
         this.x = x;
         this.y = y;
-        this.speed = speed;
+        this.speed = 30;
         this.color = color;
         this.radius = radius;
         this.target = target
@@ -388,12 +406,13 @@ $(document).ready(function () {
                 this.moveTowards(protonArray[this.target]);
             }
             if(this.overlap(this, protonArray[this.target])){
+				makeExplosion(30);
                 
             }
 			for(i in partObstacles){
 				if(this.overlap(this, partObstacles[i])){
-					console.log("Protons Collide");
-					 ctx.fillText("Collision: " + true, 5, 50);
+					//state.lose = true;
+					//state.onGoing = false;
 				}
 			}
         }   
@@ -444,7 +463,36 @@ $(document).ready(function () {
     createProtons("left");
     createProtons("right");
 
-
+//----------------------Particle System for Win Condition--------------
+//--------------------------------------------------------------------------
+	var explosion = new Array();
+	function explosionParticle(x, y, radius, vSpeed, hSpeed){
+		this.x = x;
+		this.y = y;
+		this.radius = radius;
+		this.vSpeed = vSpeed;
+		this.hSpeed = hSpeed;
+		
+		this.draw = function () {
+			console.log("Explode");
+            ctx.strokeStyle = "red";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+		}
+	
+		this.update = function(){
+			this.x += this.hSpeedpeed;
+			this.y += this.vSpeed;
+		}
+	}
+	
+	function makeExplosion(numParticles){
+	 for (var i = 0; i < numParticles / 5; i++) {
+		 
+		explosion.push(new explosionParticle(protonArray[1].x, protonArray[1].y, 15, Math.sin(i), Math.cos(i)));
+	  }
+	}
     
 //----------------------Weasel Implementation---------------------------------
 //----------------------------------------------------------------------
@@ -581,12 +629,14 @@ $(document).ready(function () {
 
     //Update function
     function update() {
-        if (mouseDowned) {
-            mousePos = getMousePos(canvas, event);
-        }
-        screenMan.update();
-        
-        canMove = true;
+		if(state.onGoing){
+			if (mouseDowned) {
+				mousePos = getMousePos(canvas, event);
+			}
+			screenMan.update();
+			
+			canMove = true;
+		}
     }
 
     function loadContent() {
