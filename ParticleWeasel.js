@@ -30,7 +30,17 @@ $(document).ready(function () {
     sources.push("./images/MainMenu.png");
     sources.push("./images/ResumeGame.png");
     sources.push("./images/Seal.png");
-    
+    sources.push("./images/Particle1.png");
+    sources.push("./images/Particle2.png");
+    sources.push("./images/Particle3.png");
+    sources.push("./images/Particle4.png");
+    sources.push("./images/Particle6.png");
+    sources.push("./images/Particle7.png");
+    sources.push("./images/Particle8.png");
+    sources.push("./images/Particle9.png");
+    sources.push("./images/Particle10.png");
+    sources.push("./images/Particle12.png");
+    sources.push("./images/Particle13.png");
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
     
@@ -308,7 +318,8 @@ $(document).ready(function () {
         this.color = color;
         this.radius = radius;
         this.running = false;
-        
+        this.image.src = sources[7];
+
         this.float = function() {
             if (this.y > 0 && this.period >= 0) {
                 this.y -= this.speed;
@@ -342,13 +353,13 @@ $(document).ready(function () {
         
     }
     
-    Particle.prototype.draw = function() {
+/*    Particle.prototype.draw = function() {
             ctx.strokeStyle = this.color;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
             ctx.stroke();
             this.drawChildren();
-        }
+        }*/
 
     Particle.prototype.moveTowards = function (Coord){
             diffX = Coord.x - this.x;
@@ -392,59 +403,49 @@ $(document).ready(function () {
         Sprite.call(this);
         this.x = x;
         this.y = y;
+        this.width = radius*2;
+        this.height = radius*2;
         this.speed = speed;
         this.color = color;
         this.radius = radius;
         this.target = target
-        //@todo: Add sprite image?
-        this.draw = function () {
+        this.image.src=sources[8];
+
+
+    }
+    Proton.prototype = new Particle();
+/*        this.draw = function () {
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
             ctx.stroke();
             //this.drawChildren();
+        }*/
+    Proton.prototype.update = function () {
+        if(weasel.followPower == true){
+            this.moveTowards(weasel);
         }
-
-        this.update = function () {
-            if(weasel.followPower == true){
-                this.moveTowards(weasel);
-            }
-            if(protonArray.length == 2 && weasel.followPower == false){
-                this.moveTowards(protonArray[this.target]);
-            }
-            if(this.overlap(this, protonArray[this.target])){
-                console.log("Protons Collide");
-            }
-        }   
+        if(protonArray.length == 2 && weasel.followPower == false){
+            this.moveTowards(protonArray[this.target]);
+        }
+        if(this.overlap(this, protonArray[this.target])){
+            console.log("Protons Collide");
+        }
+    }
         
-        this.moveTowards = function (Coord){
-            diffX = Coord.x - this.x;
-            diffY = Coord.y - this.y;
-	        angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(angle * Math.PI/180) * this.speed;
-            this.y += Math.sin(angle * Math.PI/180) * this.speed;
-    
-        
-         }
          
-        this.overlap = function (a, b) {
-            aMaxX = a.x + a.width; 
-            aMaxY = a.y + a.height;
-            bMaxX = b.x + b.width;
-            bMaxY = b.y + b.height;
-            
-            
-                    
+    Proton.prototype.overlap = function (a, b) {
+        aMaxX = a.x + a.width; 
+        aMaxY = a.y + a.height;
+        bMaxX = b.x + b.width;
+        bMaxY = b.y + b.height;
 
-            if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
-            if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
+        if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
+        if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
 
-            return true;
+        return true;
     }
 	
-	   
-
-    }
     
     function createProtons(side){
             if(side == "left"){
@@ -456,9 +457,6 @@ $(document).ready(function () {
             protonCount--;
         }
         
-    
-        
-    
         
     createProtons("left");
     createProtons("right");
