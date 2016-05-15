@@ -17,7 +17,7 @@ $(document).ready(function () {
     var h = $("#canvas").height();
 
      //Audio variables
-    var aud = new Audio();
+    var aud = new Audio("theme.mp3");
     var pauseMusic = false;
     var highscore = 0;
 
@@ -63,6 +63,31 @@ $(document).ready(function () {
     event = e;
     })
 
+    $(document).keydown(function(e){
+        if (e.which == 32) {
+            switch(pauseMusic) {
+                case false:
+                    pauseMusic = true;
+                    break;
+                case true:
+                    pauseMusic = false;
+                    break;
+            }
+        }
+        for (var i in keysDowned) {
+            if (keysDowned[i] == e.which) return;
+        }
+        keysDowned.push(e.which);
+    })
+
+    $(document).keyup(function(e) {
+        for (var i in keysDowned) {
+            if (keysDowned[i] == e.which) {
+                keysDowned.splice(i,1);
+            }
+        }
+    })
+
     //Call with global event variable
     function getMousePos(canvas, evt) {
         var rect = canvas.getBoundingClientRect();
@@ -71,6 +96,15 @@ $(document).ready(function () {
             y: evt.clientY - rect.top
         };
     }
+
+//----------------------Game State-----------------------------------
+//-----------------------------------------------------------------------
+    function gameState(){
+    	this.onGoing = true;
+    	this.win = false;
+    	this.lose = false;
+    }
+    state = new gameState();
 //----------------------Sprite Function----------------------------------
 //-----------------------------------------------------------------------
 
@@ -269,7 +303,7 @@ $(document).ready(function () {
       for(i in protonArray){
         protonArray[i].draw();
       }
-  		for(i in explosion){
+        for(i in explosion){
         explosion[i].draw();
       }
       this.drawChildren();
@@ -308,6 +342,8 @@ $(document).ready(function () {
         }
 
     }
+
+
 
 //----------------------Obstacle particle system-------------------------
 //-----------------------------------------------------------------------
@@ -396,7 +432,7 @@ $(document).ready(function () {
                 Math.random()*w, canvas.height, 10, "red",10 ))
         }
     }
-    createObstacles(1);
+    createObstacles(30);
 
 //----------------------Proton "System"---------------------------------
 //----------------------------------------------------------------------
@@ -405,33 +441,46 @@ $(document).ready(function () {
 
     var protonArray = new Array();
     protonCount = 1;
-    function Proton(x, y, speed, color, radius, target){
+    function Proton(x, y, speed, side, radius, target){
         Sprite.call(this);
         this.x = x;
         this.y = y;
         this.width = radius*2;
         this.height = radius*2;
         this.speed = 5;
-        this.color = color;
+        this.side = side;
         this.radius = radius;
         this.target = target
         this.image.src=sources[4];
-
+        this.array = [];
 
     }
+
     Proton.prototype = new Particle();
-/*        this.draw = function () {
-            ctx.strokeStyle = color;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
-            ctx.stroke();
-            //this.drawChildren();
-        }*/
+
+    Proton.prototype.init = function() {
+        if (this.side == "left") {
+            this.x = -5;
+            this.y = h/4;
+        } else {
+            this.x = w+5;
+            this.y = 3*(h/4);
+        }
+    }
+
     Proton.prototype.update = function () {
         if(weasel.followPower == true){
+          console.log(distance(this,weasel));
+          console.log(distance(partObstacles[this.target], weasel));
+          if(distance(this, weasel) < distance(protonArray[this.target], weasel)){
+            protonArray[this.target].moveTowards(this);
             this.moveTowards(weasel);
+          }else if(distance(this, weasel) > distance(protonArray[this.target], weasel)){
+            this.moveTowards(protonArray[this.target]);
+            partObstacles[this.target].moveTowards(weasel);
+          }
         }
-        if(protonArray.length == 2 && weasel.followPower == false){
+        if(protonArray.length == 2 && !weasel.followPower){
             this.moveTowards(protonArray[this.target]);
         }
         if(weasel.forcePush) {
@@ -445,6 +494,19 @@ $(document).ready(function () {
             makeExplosion(40);
             protonArray.pop();
             protonArray.pop();
+        }
+        for(i in partObstacles){
+  				if(this.overlap(this, partObstacles[i])){
+  					protonArray.pop();
+            protonArray.pop();
+            protonCount += 2;
+            createProtons("left");
+
+            createProtons("right");
+  				}
+        }
+        if(this.x < -50 || this.x > w+50) {
+            this.init();
         }
     }
 
@@ -464,10 +526,10 @@ $(document).ready(function () {
 
     function createProtons(side){
             if(side == "left"){
-                protonArray.push(new Proton(5, h/2 ,2, "blue", 15, protonCount));
+                protonArray.push(new Proton(-30, h/2 ,2, "left", 15, protonCount));
             }
             if(side == "right"){
-                protonArray.push(new Proton(w-5, h/2 ,2, "orange", 15, protonCount));
+                protonArray.push(new Proton(w+5, (h/2) ,2, "right", 15, protonCount));
             }
             protonCount--;
         }
@@ -480,15 +542,15 @@ $(document).ready(function () {
 //--------------------------------------------------------------------------
     var explosion = new Array();
     function explosionParticle(x, y, radius, vSpeed, hSpeed){
-      Sprite.call(this);
-    	this.x = x;
-    	this.y = y;
-      this.width = radius*2;
-      this.height = radius*2;
-    	this.radius = radius;
-    	this.vSpeed = vSpeed;
-    	this.hSpeed = hSpeed;
-      this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
+        Sprite.call(this);
+        this.x = x;
+        this.y = y;
+        this.width = radius*2;
+        this.height = radius*2;
+        this.radius = radius;
+        this.vSpeed = vSpeed;
+        this.hSpeed = hSpeed;
+        this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
     }
 
     explosionParticle.prototype = new Particle();
@@ -499,10 +561,10 @@ $(document).ready(function () {
     }
 
     function makeExplosion(numParticles){
-    	for (var i = 0; i < numParticles; i++) {
+        for (var i = 0; i < numParticles; i++) {
 
-    	explosion.push(new explosionParticle(protonArray[1].x, protonArray[1].y, 15, Math.sin(i), Math.cos(i)));
-    	}
+        explosion.push(new explosionParticle(protonArray[1].x, protonArray[1].y, 15, Math.sin(i), Math.cos(i)));
+        }
     }
 
 
@@ -640,7 +702,25 @@ $(document).ready(function () {
 //----------------------Main Update/Draw---------------------------------
 //-----------------------------------------------------------------------
 
-
+    function handleInput() {
+        if (mouseDowned) {
+            mousePos = getMousePos(canvas, event);
+        }
+        for (var i in keysDowned) {
+            key = keysDowned[i];
+            if (key == 32) {
+                switch(pauseMusic) {
+                    case false:
+                        aud.play();
+                        break;
+                    case true:
+                        aud.pause();
+                        break;
+                }
+            }
+            if (key == 27) screenMan.push(pauseScreen);
+        }
+    }
 
     function draw() {
         //Draw Background
@@ -652,16 +732,15 @@ $(document).ready(function () {
         ctx.fillText("aMaxY: " + aMaxY, 5, 20);
         ctx.fillText("bMaxX: " + bMaxX, 5, 30);
         ctx.fillText("bMaxY: " + bMaxY, 5, 40);
+        ctx.fillText("pauseMusic " + pauseMusic, 5, 50);
     }
 
     //Update function
     function update() {
-        if (mouseDowned) {
-            mousePos = getMousePos(canvas, event);
-        }
+      if(state.onGoing){
+        handleInput();
         screenMan.update();
-
-        canMove = true;
+      }
     }
 
     function loadContent() {
