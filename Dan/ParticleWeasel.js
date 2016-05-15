@@ -15,12 +15,12 @@ $(document).ready(function () {
     var ctx = canvas.getContext("2d");
     var w = $("#canvas").width();
     var h = $("#canvas").height();
-    
+
      //Audio variables
-    var aud = new Audio();
+    var aud = new Audio("theme.mp3");
     var pauseMusic = false;
     var highscore = 0;
-    
+
 //----------------------Images----------------------------------
 //-----------------------------------------------------------------------
     //Source image array
@@ -30,11 +30,12 @@ $(document).ready(function () {
     sources.push("./images/MainMenu.png");
     sources.push("./images/ResumeGame.png");
     sources.push("./images/Seal.png");
+    sources.push("./images/Particle6.png");
     sources.push("./images/Particle1.png");
     sources.push("./images/Particle2.png");
     sources.push("./images/Particle3.png");
     sources.push("./images/Particle4.png");
-    sources.push("./images/Particle6.png");
+
     sources.push("./images/Particle7.png");
     sources.push("./images/Particle8.png");
     sources.push("./images/Particle9.png");
@@ -43,13 +44,13 @@ $(document).ready(function () {
     sources.push("./images/Particle13.png");
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
-    
+
     //Input variables
     var event;
-    var mousePos; 
+    var mousePos;
     var mouseDowned = false;
     keysDowned = [];
-    
+
     $(document).mousedown(function(e) {
     mouseDowned = true;
     })
@@ -60,6 +61,31 @@ $(document).ready(function () {
 
     $(document).mousemove(function(e) {
     event = e;
+    })
+
+    $(document).keydown(function(e){
+        if (e.which == 32) {
+            switch(pauseMusic) {
+                case false:
+                    pauseMusic = true;
+                    break;
+                case true:
+                    pauseMusic = false;
+                    break;
+            }
+        }
+        for (var i in keysDowned) {
+            if (keysDowned[i] == e.which) return;
+        }
+        keysDowned.push(e.which);
+    })
+
+    $(document).keyup(function(e) {
+        for (var i in keysDowned) {
+            if (keysDowned[i] == e.which) {
+                keysDowned.splice(i,1);
+            }
+        }
     })
 
     //Call with global event variable
@@ -86,7 +112,7 @@ $(document).ready(function () {
 
 
     Sprite.prototype.setSrc = function(src) {
-        this.image.src = src;   
+        this.image.src = src;
     }
 
     //Ham-fistedly puts x and y in the center
@@ -126,20 +152,20 @@ $(document).ready(function () {
             this.children[i].update();
         }
     }
-    
-    
+
+
 //----------------------Menu System Functions---------------------------
 //----------------------------------------------------------------------
     //A viewed game state
     function Screen(alwaysUpdate, alwaysDraw){
         Sprite.call(this);
-        
+
         //Boolean
         this.alwaysUpdate = alwaysUpdate;
         this.alwaysDraw = alwaysDraw;
-        
+
         this.stage = new Sprite();
-        
+
         this.initialized = false;
     }
     Screen.prototype = new Sprite();
@@ -150,7 +176,7 @@ $(document).ready(function () {
     //Object holding Screens
     function ScreenManager(){
         Sprite.call(this);
-        
+
         this.screens = [];
     }
     ScreenManager.prototype = new Sprite();
@@ -182,9 +208,9 @@ $(document).ready(function () {
 
     ScreenManager.prototype.update = function(){
         var screens = this.screens;
-        
+
         for(var i in screens){
-            
+
             if(screens[i].alwaysUpdate || screens[i] == screens[screens.length-1]){
                 if(!screens[i].initialized){
                     screens[i].init();
@@ -197,13 +223,13 @@ $(document).ready(function () {
 
     ScreenManager.prototype.draw = function(){
         var screens = this.screens;
-        
+
         for(var i in screens){
-            
+
             if(screens[i].alwaysDraw || screens[i] == screens[screens.length-1]){
                 screens[i].draw();
             }
-        }    
+        }
     }
 
 
@@ -242,31 +268,36 @@ $(document).ready(function () {
     //----Game Screen-----------------\\
     var gameScreen = new Screen(false, true);
     gameScreen.obstacles = new Array();
-    
+
     gameScreen.init = function() {
         this.addChild(weasel);
-        
+
         //this.addChild(partObstacles);
     }
     gameScreen.update = function() {
         for(i in partObstacles){
             partObstacles[i].update();
         }
-        
+
         for(i in protonArray){
             protonArray[i].update();
+        }
+        for(i in explosion){
+            explosion[i].update();
         }
         this.updateChildren();
     }
     gameScreen.draw = function() {
-    for(i in partObstacles){
-            partObstacles[i].draw();
-        }
-        
-        for(i in protonArray){
-            protonArray[i].draw();
-        } 
-        this.drawChildren();
+      for(i in partObstacles){
+        partObstacles[i].draw();
+      }
+      for(i in protonArray){
+        protonArray[i].draw();
+      }
+        for(i in explosion){
+        explosion[i].draw();
+      }
+      this.drawChildren();
     }
 
     //----Pause Menu-----------------\\
@@ -302,7 +333,7 @@ $(document).ready(function () {
         }
 
     }
-    
+
 //----------------------Obstacle particle system-------------------------
 //-----------------------------------------------------------------------
     var partObstacles = new Array();
@@ -318,7 +349,7 @@ $(document).ready(function () {
         this.color = color;
         this.radius = radius;
         this.running = false;
-        this.image.src = sources[7];
+        this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
 
         this.float = function() {
             if (this.y > 0 && this.period >= 0) {
@@ -342,7 +373,7 @@ $(document).ready(function () {
             }
         }
     }
-    
+
     Particle.prototype = new Sprite();
 
     Particle.prototype.update = function() {
@@ -350,9 +381,9 @@ $(document).ready(function () {
         if(this.running) {
             this.moveAway(weasel);
         } else this.float();
-        
+
     }
-    
+
 /*    Particle.prototype.draw = function() {
             ctx.strokeStyle = this.color;
             ctx.beginPath();
@@ -370,7 +401,7 @@ $(document).ready(function () {
             this.x += Math.cos(angle * Math.PI/180) * this.speed;
             this.y += Math.sin(angle * Math.PI/180) * this.speed;
         }
-        
+
     Particle.prototype.moveAway = function (Coord){
             diffX = Coord.x - this.x;
             diffY = Coord.y - this.y;
@@ -390,29 +421,30 @@ $(document).ready(function () {
                 Math.random()*w, canvas.height, 10, "red",10 ))
         }
     }
-    createObstacles(30);
+    createObstacles(1);
 
 //----------------------Proton "System"---------------------------------
 //----------------------------------------------------------------------
-    
+
     //Could not figure out a way to make them moves towards eacht
-    
+
     var protonArray = new Array();
     protonCount = 1;
-    function Proton(x, y, speed, color, radius, target){
+    function Proton(x, y, speed, side, radius, target){
         Sprite.call(this);
         this.x = x;
         this.y = y;
         this.width = radius*2;
         this.height = radius*2;
-        this.speed = speed;
-        this.color = color;
+        this.speed = 5;
+        this.side = side;
         this.radius = radius;
         this.target = target
-        this.image.src=sources[8];
-
+        this.image.src=sources[4];
+        this.array = [];
 
     }
+
     Proton.prototype = new Particle();
 /*        this.draw = function () {
             ctx.strokeStyle = color;
@@ -421,48 +453,103 @@ $(document).ready(function () {
             ctx.stroke();
             //this.drawChildren();
         }*/
+
+    Proton.prototype.init = function() {
+        if (this.side == "left") {
+            this.x = -5;
+            this.y = h/4;
+        } else {
+            this.x = w+5;
+            this.y = 3*(h/4);
+        }
+    }
+
     Proton.prototype.update = function () {
         if(weasel.followPower == true){
             this.moveTowards(weasel);
         }
-        if(protonArray.length == 2 && weasel.followPower == false){
+        if(protonArray.length == 2 && !weasel.followPower && distance(this,protonArray[this.target])<100){
             this.moveTowards(protonArray[this.target]);
+        } else if(!weasel.followPower) {
+            if (this.side == "left") this.x+=this.speed;
+            if (this.side == "right") this.x-=this.speed;
         }
+        if(weasel.forcePush) {
+          for(i in partObstacles){
+              if(distance(weasel, partObstacles[i]) < 200) {
+                  partObstacles[i].running = true;
+              }
+            }
+          }
         if(this.overlap(this, protonArray[this.target])){
-            console.log("Protons Collide");
+            makeExplosion(40);
+            protonArray.pop();
+            protonArray.pop();
+        }
+        if(this.x < -50 || this.x > w+50) {
+            this.init();
         }
     }
-        
-         
+
+
     Proton.prototype.overlap = function (a, b) {
-        aMaxX = a.x + a.width; 
-        aMaxY = a.y + a.height;
-        bMaxX = b.x + b.width;
-        bMaxY = b.y + b.height;
+        aMaxX = a.x //+ a.width;
+        aMaxY = a.y //+ a.height;
+        bMaxX = b.x //+ b.width;
+        bMaxY = b.y //+ b.height;
 
         if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
         if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
 
         return true;
     }
-	
-    
+
+
     function createProtons(side){
             if(side == "left"){
-                protonArray.push(new Proton(5, h/2 ,2, "blue", 15, protonCount));
+                protonArray.push(new Proton(-30, h/4 ,2, "left", 15, protonCount));
             }
             if(side == "right"){
-                protonArray.push(new Proton(w-5, h/2 ,2, "orange", 15, protonCount));
+                protonArray.push(new Proton(w+5, 3*(h/4) ,2, "right", 15, protonCount));
             }
             protonCount--;
         }
-        
-        
+
+
     createProtons("left");
     createProtons("right");
 
+//----------------------Particle System for Win Condition--------------
+//--------------------------------------------------------------------------
+    var explosion = new Array();
+    function explosionParticle(x, y, radius, vSpeed, hSpeed){
+        Sprite.call(this);
+        this.x = x;
+        this.y = y;
+        this.width = radius*2;
+        this.height = radius*2;
+        this.radius = radius;
+        this.vSpeed = vSpeed;
+        this.hSpeed = hSpeed;
+        this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
+    }
 
-    
+    explosionParticle.prototype = new Particle();
+
+    explosionParticle.prototype.update = function(){
+      this.x += this.hSpeed;
+      this.y += this.vSpeed;
+    }
+
+    function makeExplosion(numParticles){
+        for (var i = 0; i < numParticles; i++) {
+
+        explosion.push(new explosionParticle(protonArray[1].x, protonArray[1].y, 15, Math.sin(i), Math.cos(i)));
+        }
+    }
+
+
+
 //----------------------Weasel Implementation---------------------------------
 //----------------------------------------------------------------------
     var weasel = new Sprite();
@@ -476,43 +563,45 @@ $(document).ready(function () {
     weasel.stopped = true;
     weasel.numEaten = 0;
     weasel.followPower = false;
-    weasel.forcePush = true;
+    weasel.forcePush = false;
 
     weasel.update = function() {
-        if(weasel.forcePush) {
-            for(i in partObstacles){
-                if(distance(this,partObstacles[i]) <200) {
-                    partObstacles[i].running = true;
-                }
-            }
+        if(this.numEaten > 2 && this.numEaten < 5){
+          this.followPower = true;
+        }else{
+          this.followPower = false;
         }
-
+        if(this.numEaten > 7 && this.numEaten < 30){
+          this.forcePush = true;
+        }else{
+          this.followPower = false;
+        }
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
                 partObstacles.splice(i,1);
                 this.numEaten++;
             }
         }
- 
+
         if (mouseDowned && this.stopped == true) {
             this.stopped = false;
             this.speed = .5;
-            
+
         }
-        
+
         if(this.numEaten > 2){
             this.followPower = true;
         }
-        
+
         this.accel = 1.25;
 
         diffX = mousePos.x - this.x;
         diffY = mousePos.y - this.y;
 
-        
+
         //Set Max Speed
         if (this.speed > 10) this.speed = 10;
-        
+
         //Set Min Speed
         if (this.speed < 2) this.speed = 2;
 
@@ -541,7 +630,7 @@ $(document).ready(function () {
 
 //----------------------Different collision checks----------------------
 //----------------------------------------------------------------------
-        
+
     function check_collision(x, y, array)
     {
         //This function will check if the provided x/y coordinates exist
@@ -555,7 +644,7 @@ $(document).ready(function () {
     }
 
     function checkBounds(box, x, y) {
-       if (x > box.x && x < box.x + box.width && y > box.y 
+       if (x > box.x && x < box.x + box.width && y > box.y
                && y < box.y + box.height) {
            return true;
        }
@@ -575,9 +664,9 @@ $(document).ready(function () {
         aMaxY = a.y;
         bMaxX = b.x + b.width;
         bMaxY = b.y + b.height;
-        
-        
-                
+
+
+
 
         if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
         if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
@@ -594,7 +683,25 @@ $(document).ready(function () {
 //----------------------Main Update/Draw---------------------------------
 //-----------------------------------------------------------------------
 
-
+    function handleInput() {
+        if (mouseDowned) {
+            mousePos = getMousePos(canvas, event);
+        }
+        for (var i in keysDowned) {
+            key = keysDowned[i];
+            if (key == 32) {
+                switch(pauseMusic) {
+                    case false:
+                        aud.play();
+                        break;
+                    case true:
+                        aud.pause();
+                        break;
+                }
+            }
+            if (key == 27) screenMan.push(pauseScreen);
+        }
+    }
 
     function draw() {
         //Draw Background
@@ -606,16 +713,13 @@ $(document).ready(function () {
         ctx.fillText("aMaxY: " + aMaxY, 5, 20);
         ctx.fillText("bMaxX: " + bMaxX, 5, 30);
         ctx.fillText("bMaxY: " + bMaxY, 5, 40);
+        ctx.fillText("pauseMusic " + pauseMusic, 5, 50);
     }
 
     //Update function
     function update() {
-        if (mouseDowned) {
-            mousePos = getMousePos(canvas, event);
-        }
+        handleInput();
         screenMan.update();
-        
-        canMove = true;
     }
 
     function loadContent() {
