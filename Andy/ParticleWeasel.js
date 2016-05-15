@@ -30,7 +30,18 @@ $(document).ready(function () {
     sources.push("./images/MainMenu.png");
     sources.push("./images/ResumeGame.png");
     sources.push("./images/Seal.png");
+    sources.push("./images/Particle6.png");
+    sources.push("./images/Particle1.png");
+    sources.push("./images/Particle2.png");
+    sources.push("./images/Particle3.png");
+    sources.push("./images/Particle4.png");
 
+    sources.push("./images/Particle7.png");
+    sources.push("./images/Particle8.png");
+    sources.push("./images/Particle9.png");
+    sources.push("./images/Particle10.png");
+    sources.push("./images/Particle12.png");
+    sources.push("./images/Particle13.png");
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
 
@@ -60,16 +71,6 @@ $(document).ready(function () {
             y: evt.clientY - rect.top
         };
     }
-
-//----------------------Game State-----------------------------------
-//-----------------------------------------------------------------------
-	function gameState(){
-		this.onGoing = true;
-		this.win = false;
-		this.lose = false;
-	}
-	state = new gameState();
-
 //----------------------Sprite Function----------------------------------
 //-----------------------------------------------------------------------
 
@@ -102,7 +103,7 @@ $(document).ready(function () {
 
     //If you override, keep this.drawChildren();
     Sprite.prototype.draw = function() {
-        console.log("drawing"+this.image.src);
+        //console.log("drawing"+this.image.src);
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         this.drawChildren();
     };
@@ -216,7 +217,7 @@ $(document).ready(function () {
     var menu = new Screen(false,false);
     screenMan.push(menu);
     menu.init = function() {
-        console.log("initializing");
+        //console.log("initializing");
         var newGame = new Sprite();
         newGame.name = "New Game"
         newGame.image = new Image();
@@ -256,25 +257,22 @@ $(document).ready(function () {
         for(i in protonArray){
             protonArray[i].update();
         }
-
-		for(i in explosion){
+        for(i in explosion){
             explosion[i].update();
         }
         this.updateChildren();
     }
     gameScreen.draw = function() {
-		for(i in partObstacles){
-            partObstacles[i].draw();
-        }
-
-        for(i in protonArray){
-            protonArray[i].draw();
-        }
-
-		 for(i in explosion){
-            explosion[i].draw();
-        }
-        this.drawChildren();
+      for(i in partObstacles){
+        partObstacles[i].draw();
+      }
+      for(i in protonArray){
+        protonArray[i].draw();
+      }
+  		for(i in explosion){
+        explosion[i].draw();
+      }
+      this.drawChildren();
     }
 
     //----Pause Menu-----------------\\
@@ -311,7 +309,7 @@ $(document).ready(function () {
 
     }
 
-//----------------------Particle system-------------------------
+//----------------------Obstacle particle system-------------------------
 //-----------------------------------------------------------------------
     var partObstacles = new Array();
     function Particle(lifeTime, speed, x, y, period, color, radius) {
@@ -325,46 +323,72 @@ $(document).ready(function () {
         this.period = period;
         this.color = color;
         this.radius = radius;
+        this.running = false;
+        this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
+
+        this.float = function() {
+            if (this.y > 0 && this.period >= 0) {
+                this.y -= this.speed;
+                this.x += this.speed * .3;
+                this.period--;
+                if (this.period == 0) {
+                    this.period = -10;
+                }
+            } else if (this.y > 0 && this.period < 0) {
+                this.y -= this.speed;
+                this.x -= this.speed * .3;
+                this.period++;
+                if (this.period == 0) {
+                    this,period = 10;
+                }
+            } else {
+                this.y = h;
+                this.x = Math.random() * w;
+                this.period = 10;
+            }
+        }
     }
 
     Particle.prototype = new Sprite();
 
     Particle.prototype.update = function() {
-        if (this.y > 0 && this.period >= 0) {
-            this.y -= this.speed;
-            this.x += this.speed * .3;
-            this.period--;
-            if (this.period == 0) {
-                this.period = -10;
-            }
-        } else if (this.y > 0 && this.period < 0) {
-            this.y -= this.speed;
-            this.x -= this.speed * .3;
-            this.period++;
-            if (this.period == 0) {
-                this,period = 10;
-            }
-        } else {
-            this.y = h;
-            this.x = Math.random() * w;
-            this.period = 10;
-        }
+        //console.log(this.running);
+        if(this.running) {
+            this.moveAway(weasel);
+        } else this.float();
+
     }
 
-    Particle.prototype.draw = function() {
+/*    Particle.prototype.draw = function() {
             ctx.strokeStyle = this.color;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
             ctx.stroke();
             this.drawChildren();
+        }*/
+
+    Particle.prototype.moveTowards = function (Coord){
+            diffX = Coord.x - this.x;
+            diffY = Coord.y - this.y;
+            //console.log("x = " + Coord.x);
+            //console.log("y = " + Coord.y);
+            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            this.x += Math.cos(angle * Math.PI/180) * this.speed;
+            this.y += Math.sin(angle * Math.PI/180) * this.speed;
         }
 
+    Particle.prototype.moveAway = function (Coord){
+            diffX = Coord.x - this.x;
+            diffY = Coord.y - this.y;
+            //console.log("x = " + Coord.x);
+            //console.log("y = " + Coord.y);
+            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            this.x += Math.cos(angle * Math.PI/180) * -this.speed;
+            this.y += Math.sin(angle * Math.PI/180) * -this.speed;
+        }
 
     //Varation on basic particle, add update function to change behavior.
-    var anObstacle = new Particle(Math.random()*10, 5 - Math.random()*4, Math.random()*w, canvas.height, 10, "red",10);
-    anObstacle.update = function() {
-
-    }
+    var forcePush = new Particle(Math.random()*10, 5 - Math.random()*4, Math.random()*w, canvas.height, 10, "blue",10);
 
     function createObstacles(numObstacles) {
         for(var i = 0; i < numObstacles; i++){
@@ -372,12 +396,12 @@ $(document).ready(function () {
                 Math.random()*w, canvas.height, 10, "red",10 ))
         }
     }
-    createObstacles(30);
+    createObstacles(1);
 
 //----------------------Proton "System"---------------------------------
-//--------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-
+    //Could not figure out a way to make them moves towards eacht
 
     var protonArray = new Array();
     protonCount = 1;
@@ -385,70 +409,58 @@ $(document).ready(function () {
         Sprite.call(this);
         this.x = x;
         this.y = y;
-        this.speed = 30;
+        this.width = radius*2;
+        this.height = radius*2;
+        this.speed = 5;
         this.color = color;
         this.radius = radius;
         this.target = target
-        //@todo: Add sprite image?
-        this.draw = function () {
+        this.image.src=sources[4];
+
+
+    }
+    Proton.prototype = new Particle();
+/*        this.draw = function () {
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
             ctx.stroke();
             //this.drawChildren();
+        }*/
+    Proton.prototype.update = function () {
+        if(weasel.followPower == true){
+            this.moveTowards(weasel);
         }
-
-        this.update = function () {
-            if(weasel.followPower == true){
-                this.moveTowards(weasel);
-            }
-            if(protonArray.length == 2 && weasel.followPower == false){
-                this.moveTowards(protonArray[this.target]);
-            }
-            if(this.overlap(this, protonArray[this.target])){
-                this.speed = 0;
-                this.target.speed = 0;
-				        makeExplosion(40);
-                protonArray.pop();
-                protonArray.pop();
-
-            }
-			for(i in partObstacles){
-				if(this.overlap(this, partObstacles[i])){
-					//state.lose = true;
-					//state.onGoing = false;
-				}
-			}
+        if(protonArray.length == 2 && weasel.followPower == false){
+            this.moveTowards(protonArray[this.target]);
         }
-
-        this.moveTowards = function (Coord){
-            diffX = Coord.x - this.x;
-            diffY = Coord.y - this.y;
-	          angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(angle * Math.PI/180) * this.speed;
-            this.y += Math.sin(angle * Math.PI/180) * this.speed;
-
-
-         }
-
-        this.overlap = function (a, b) {
-            aMaxX = a.x;
-            aMaxY = a.y;
-            bMaxX = b.x;
-            bMaxY = b.y;
-
-
-
-
-            if (aMaxX < b.x-a.radius || a.x-a.radius > bMaxX) return false;
-            if (aMaxY < b.y-a.radius || a.y-a.radius > bMaxY) return false;
-
-            return true;
+        if(weasel.forcePush) {
+          for(i in partObstacles){
+              if(distance(weasel, partObstacles[i]) < 200) {
+                  partObstacles[i].running = true;
+              }
+            }
+          }
+        if(this.overlap(this, protonArray[this.target])){
+            makeExplosion(40);
+            protonArray.pop();
+            protonArray.pop();
+        }
     }
 
 
+    Proton.prototype.overlap = function (a, b) {
+        aMaxX = a.x //+ a.width;
+        aMaxY = a.y //+ a.height;
+        bMaxX = b.x //+ b.width;
+        bMaxY = b.y //+ b.height;
 
+        if (aMaxX < b.x-a.width/2 || a.x-(a.width/2) > bMaxX) return false;
+        if (aMaxY < b.y-a.height/2 || a.y-(a.height/2) > bMaxY) return false;
+
+        return true;
     }
+
 
     function createProtons(side){
             if(side == "left"){
@@ -461,42 +473,39 @@ $(document).ready(function () {
         }
 
 
-
-
-
     createProtons("left");
     createProtons("right");
 
 //----------------------Particle System for Win Condition--------------
 //--------------------------------------------------------------------------
-	var explosion = new Array();
-	function explosionParticle(x, y, radius, vSpeed, hSpeed){
-		this.x = x;
-		this.y = y;
-		this.radius = radius;
-		this.vSpeed = vSpeed;
-		this.hSpeed = hSpeed;
+    var explosion = new Array();
+    function explosionParticle(x, y, radius, vSpeed, hSpeed){
+      Sprite.call(this);
+    	this.x = x;
+    	this.y = y;
+      this.width = radius*2;
+      this.height = radius*2;
+    	this.radius = radius;
+    	this.vSpeed = vSpeed;
+    	this.hSpeed = hSpeed;
+      this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
+    }
 
-		this.draw = function () {
-			console.log("Explode");
-      ctx.strokeStyle = "red";
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
-      ctx.stroke();
-		}
+    explosionParticle.prototype = new Particle();
 
-		this.update = function(){
-			this.x += this.hSpeed;
-			this.y += this.vSpeed;
-		}
-	}
+    explosionParticle.prototype.update = function(){
+      this.x += this.hSpeed;
+      this.y += this.vSpeed;
+    }
 
-	function makeExplosion(numParticles){
-	 for (var i = 0; i < numParticles; i++) {
+    function makeExplosion(numParticles){
+    	for (var i = 0; i < numParticles; i++) {
 
-		explosion.push(new explosionParticle(protonArray[1].x, protonArray[1].y, 15, Math.sin(i), Math.cos(i)));
-	  }
-	}
+    	explosion.push(new explosionParticle(protonArray[1].x, protonArray[1].y, 15, Math.sin(i), Math.cos(i)));
+    	}
+    }
+
+
 
 //----------------------Weasel Implementation---------------------------------
 //----------------------------------------------------------------------
@@ -511,8 +520,19 @@ $(document).ready(function () {
     weasel.stopped = true;
     weasel.numEaten = 0;
     weasel.followPower = false;
+    weasel.forcePush = false;
 
     weasel.update = function() {
+        if(this.numEaten > 2 && this.numEaten < 5){
+          this.followPower = true;
+        }else{
+          this.followPower = false;
+        }
+        if(this.numEaten > 7 && this.numEaten < 30){
+          this.forcePush = true;
+        }else{
+          this.followPower = false;
+        }
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
                 partObstacles.splice(i,1);
@@ -535,20 +555,16 @@ $(document).ready(function () {
         diffX = mousePos.x - this.x;
         diffY = mousePos.y - this.y;
 
-        distance = Math.sqrt(diffX^2 + diffY^2);
 
         //Set Max Speed
         if (this.speed > 10) this.speed = 10;
-
-        //Slow down if getting close, needs image offset
-        //if (distance < 10) this.accel = .75;
 
         //Set Min Speed
         if (this.speed < 2) this.speed = 2;
 
         this.center();
         if (checkBounds(this, mousePos.x, mousePos.y)) {
-            console.log("stopping");
+            //console.log("stopping");
             this.stopped = true;
             this.speed = 0;
         }
@@ -614,6 +630,13 @@ $(document).ready(function () {
 
         return true;
     }
+
+    function distance(a,b) {
+        //console.log("checking distance")
+        var d = Math.sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+        //console.log("Distance: " + d);
+        return d;
+    }
 //----------------------Main Update/Draw---------------------------------
 //-----------------------------------------------------------------------
 
@@ -633,14 +656,12 @@ $(document).ready(function () {
 
     //Update function
     function update() {
-		if(state.onGoing){
-			if (mouseDowned) {
-				mousePos = getMousePos(canvas, event);
-			}
-			screenMan.update();
+        if (mouseDowned) {
+            mousePos = getMousePos(canvas, event);
+        }
+        screenMan.update();
 
-			canMove = true;
-		}
+        canMove = true;
     }
 
     function loadContent() {
