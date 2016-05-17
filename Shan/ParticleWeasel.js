@@ -626,7 +626,7 @@ $(document).ready(function () {
           this.forcePush = true;
 		  setTimeOut(setPushFalse,10000);
         }else{
-          this.followPower = false;
+          this.forcePush = false;
         }
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
@@ -677,6 +677,8 @@ $(document).ready(function () {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         this.uncenter();
         this.drawChildren();
+		ctx.fillText("Follow: " + this.followPower, 0, canvas.height/2);
+		ctx.fillText("Push: " + this.forcePush, 0, canvas.height/2 + 20);
     }
 	
 	weasel.setFollowFalse = function(){
