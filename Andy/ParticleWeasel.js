@@ -380,7 +380,7 @@ $(document).ready(function () {
         this.running = false;
         this.type = Math.floor(Math.random()  * (14-5) + 5);
         this.image.src = sources[this.type];
-        
+
         if(this.type == 5 || this.type == 8 || this.type == 7){
             this.width *= 1.5;
             this.height *= 1.5
@@ -456,7 +456,7 @@ $(document).ready(function () {
                 Math.random()*w, canvas.height, 10, "red",10 ))
         }
     }
-    
+
 
 //----------------------Proton "System"---------------------------------
 //----------------------------------------------------------------------
@@ -613,32 +613,34 @@ $(document).ready(function () {
         if(this.eaten.length == 2){
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
-            
+
             if(particle0 == 5 && particle1 == 7 ||
                 particle0 == 7 && particle1 == 5){
                 this.followPower = true;
+                setTimeout(this.setFollowFalse,5000); //5sec
             }else{
                 this.followPower = false;
             }
-            
+
              if(particle0 == 8 && particle1 == 5 ||
                 particle0 == 5 && particle1 == 8){
                 this.forcePush = true;
+                setTimeout(this.setPushFalse,5000);
             }else{
                 this.forcePush= false;
             }
         }
-        for(i in partObstacles){      
-            if(overlap(this, partObstacles[i])){ 
+        for(i in partObstacles){
+            if(overlap(this, partObstacles[i])){
                 console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
                     this.eaten.push(partObstacles[i]);
                 } else if(this.eaten.length = 2){
                     this.eaten.pop();
                     this.eaten.push(partObstacles[i]);
-                } 
+                }
                 partObstacles.splice(i,1);
-                createObstacles(3, false);
+                createObstacles(2, false);
             }
         }
 
@@ -682,6 +684,17 @@ $(document).ready(function () {
         this.uncenter();
         this.drawChildren();
     }
+
+    weasel.setFollowFalse = function(){
+        console.log("setting false");
+        this.eaten = new Array();
+        this.followPower = false;
+      }
+
+    weasel.setPushFalse = function(){
+          this.eaten = new Array();
+          this.forcePush = false;
+       }
 
 
 //----------------------Different collision checks----------------------
