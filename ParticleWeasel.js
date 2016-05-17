@@ -135,13 +135,6 @@ $(document).ready(function () {
         this.y = this.y+this.height/2;
     }
 
-    //If you override, keep this.drawChildren();
-    Sprite.prototype.draw = function() {
-        //console.log("drawing"+this.image.src);
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        this.drawChildren();
-    };
-
     Sprite.prototype.update = function() {
         this.updateChildren();
     }
@@ -155,6 +148,13 @@ $(document).ready(function () {
             this.children[i].draw();
         }
     }
+    
+    //If you override, keep this.drawChildren();
+    Sprite.prototype.draw = function() {
+        //console.log("drawing"+this.image.src);
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        this.drawChildren();
+    };
 
     Sprite.prototype.updateChildren = function() {
         for (var i in this.children) {
@@ -180,6 +180,10 @@ $(document).ready(function () {
     Screen.prototype = new Sprite();
 
     Screen.prototype.init = function(){
+    }
+    
+    Screen.prototype.draw = function() {
+        this.drawChildren();
     }
 
     //Object holding Screens
@@ -315,7 +319,8 @@ $(document).ready(function () {
     var pauseScreen = new Screen(false, false);
     pauseScreen.init = function() {
         var main = new Sprite();
-        main.setSrc(sources[1]);
+	    main.image = new Image();        
+	    main.image.src = sources[1];
         main.width = 230;
         main.height = 34;
         main.x = canvas.width/2;
@@ -324,7 +329,8 @@ $(document).ready(function () {
         this.addChild(main);
 
         var resume = new Sprite();
-        resume.setSrc(sources[2]);
+	    resume.image = new Image();
+        resume.image.src = sources[2];
         resume.width = 296;
         resume.height = 34;
         resume.x = canvas.width/2;
@@ -343,8 +349,10 @@ $(document).ready(function () {
         }
 
     }
+    
 
     //-------Post-Explosion screen-------\\
+
     var scoreScreen = new Screen(false, false);
     scoreScreen.init = function() {
         var nextLevel = new Sprite();
@@ -362,7 +370,8 @@ $(document).ready(function () {
             screenMan.push(gameScreen);
         }
     }
-
+    
+    
 //----------------------Obstacle particle system-------------------------
 //-----------------------------------------------------------------------
     var partObstacles = new Array();
