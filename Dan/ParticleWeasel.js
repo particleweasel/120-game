@@ -100,9 +100,9 @@ $(document).ready(function () {
 //----------------------Game State-----------------------------------
 //-----------------------------------------------------------------------
     function gameState(){
-    	this.onGoing = true;
-    	this.win = false;
-    	this.lose = false;
+        this.onGoing = true;
+        this.win = false;
+        this.lose = false;
     }
     state = new gameState();
 //----------------------Sprite Function----------------------------------
@@ -135,13 +135,6 @@ $(document).ready(function () {
         this.y = this.y+this.height/2;
     }
 
-    //If you override, keep this.drawChildren();
-    Sprite.prototype.draw = function() {
-        //console.log("drawing"+this.image.src);
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        this.drawChildren();
-    };
-
     Sprite.prototype.update = function() {
         this.updateChildren();
     }
@@ -155,6 +148,13 @@ $(document).ready(function () {
             this.children[i].draw();
         }
     }
+    
+    //If you override, keep this.drawChildren();
+    Sprite.prototype.draw = function() {
+        //console.log("drawing"+this.image.src);
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        this.drawChildren();
+    };
 
     Sprite.prototype.updateChildren = function() {
         for (var i in this.children) {
@@ -180,6 +180,10 @@ $(document).ready(function () {
     Screen.prototype = new Sprite();
 
     Screen.prototype.init = function(){
+    }
+    
+    Screen.prototype.draw = function() {
+        this.drawChildren();
     }
 
     //Object holding Screens
@@ -280,7 +284,7 @@ $(document).ready(function () {
 
     gameScreen.init = function() {
         this.addChild(weasel);
-        createObstacles(30);
+        createObstacles(50);
         createProtons("left");
         createProtons("right");
         explosion = [];
@@ -315,7 +319,8 @@ $(document).ready(function () {
     var pauseScreen = new Screen(false, false);
     pauseScreen.init = function() {
         var main = new Sprite();
-        main.setSrc(sources[1]);
+        main.image = new Image();        
+        main.image.src = sources[1];
         main.width = 230;
         main.height = 34;
         main.x = canvas.width/2;
@@ -324,7 +329,8 @@ $(document).ready(function () {
         this.addChild(main);
 
         var resume = new Sprite();
-        resume.setSrc(sources[2]);
+        resume.image = new Image();
+        resume.image.src = sources[2];
         resume.width = 296;
         resume.height = 34;
         resume.x = canvas.width/2;
@@ -343,8 +349,10 @@ $(document).ready(function () {
         }
 
     }
+    
 
     //-------Post-Explosion screen-------\\
+
     var scoreScreen = new Screen(false, false);
     scoreScreen.init = function() {
         var nextLevel = new Sprite();
@@ -362,7 +370,8 @@ $(document).ready(function () {
             screenMan.push(gameScreen);
         }
     }
-
+    
+    
 //----------------------Obstacle particle system-------------------------
 //-----------------------------------------------------------------------
     var partObstacles = new Array();
@@ -422,25 +431,31 @@ $(document).ready(function () {
         }*/
 
     Particle.prototype.moveTowards = function (Coord){
-            diffX = Coord.x - this.x;
-            diffY = Coord.y - this.y;
+            var diffX = Coord.x - this.x;
+            var diffY = Coord.y - this.y;
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
-            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            var angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            console.log(angle);
             this.x += Math.cos(angle * Math.PI/180) * this.speed;
             this.y += Math.sin(angle * Math.PI/180) * this.speed;
         }
 
     Particle.prototype.moveAway = function (Coord){
-            diffX = Coord.x - this.x;
-            diffY = Coord.y - this.y;
+            var diffX = Coord.x - this.x;
+            var diffY = Coord.y - this.y;
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
-            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            var angle = Math.atan2(diffY, diffX)*180 / Math.PI;
             this.x += Math.cos(angle * Math.PI/180) * -this.speed;
             this.y += Math.sin(angle * Math.PI/180) * -this.speed;
         }
-
+    
+    Particle.prototype.move = function (a) {
+        var angle = a;
+        this.x += Math.cos(angle * Math.PI/180) * this.speed;
+        this.y += Math.sin(angle * Math.PI/180) * this.speed;
+    }
 
     //Called in game screen init.
     function createObstacles(numObstacles) {
@@ -470,8 +485,7 @@ $(document).ready(function () {
         this.radius = radius;
         this.target = target
         this.image.src=sources[4];
-        this.array = [];
-
+        this.angle = 0;
     }
 
     Proton.prototype = new Particle();
@@ -483,6 +497,7 @@ $(document).ready(function () {
         } else {
             this.x = w+5;
             this.y = 3*(h/4);
+            this.angle = 180;
         }
     }
 
@@ -499,7 +514,8 @@ $(document).ready(function () {
           }
         }
         if(protonArray.length == 2 && !weasel.followPower){
-            this.moveTowards(protonArray[this.target]);
+            //this.moveTowards(protonArray[this.target]);
+            this.move(this.angle);
         }
         if(weasel.forcePush) {
           for(i in partObstacles){
@@ -517,17 +533,12 @@ $(document).ready(function () {
             screenMan.push(scoreScreen);
         }
         for(i in partObstacles){
-  				if(this.overlap(this, partObstacles[i])){
-  					protonArray.pop();
-            protonArray.pop();
-            protonCount += 2;
-            createProtons("left");
-
-            createProtons("right");
-  				}
+            if(this.overlap(this, partObstacles[i])){
+                this.angle += Math.random()*720;
+            }
         }
-        if(this.x < -50 || this.x > w+50) {
-            this.init();
+        if(this.x < -50 || this.x > w+50 || this.y < -50 || this.y > h+50) {
+            this.angle += 180;
         }
     }
 
@@ -547,10 +558,10 @@ $(document).ready(function () {
     //Called in game screen init
     function createProtons(side){
             if(side == "left"){
-                protonArray.push(new Proton(-30, h/2 ,2, "left", 15, protonCount));
+                protonArray.push(new Proton(-30, h/4 ,2, "left", 15, protonCount));
             }
             if(side == "right"){
-                protonArray.push(new Proton(w+5, (h/2) ,2, "right", 15, protonCount));
+                protonArray.push(new Proton(w+5, 3*(h/4) ,2, "right", 15, protonCount));
             }
             protonCount--;
         }
