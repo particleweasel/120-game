@@ -412,7 +412,25 @@ $(document).ready(function () {
         }
 		
 		this.drift = function() {
-			
+			//past lower part and moving down
+			if(this.y > canvas.height && y.speed > 0){
+				this.x = Math.random() * canvas.width();
+				this.speed *= -1;
+			}
+			//past upper part and moving up
+			else if(this.y < 0 && y.speed < 0){
+				this.x = Math.random() * canvas.width();
+				this.speed *= -1;
+			}
+			//x equivalents
+			else if(this.x > canvas.width && x.speed > 0){
+				this.y = Math.random() * canvas.height();
+				this.speed *= -1;
+			}
+			else if(this.x < 0 && x.speed < 0){
+				this.y = Math.random() * canvas.height();
+				this.speed *= -1;
+			}
 		}
     }
 
@@ -618,13 +636,13 @@ $(document).ready(function () {
     weasel.update = function() {
         if(this.numEaten > 2 && this.numEaten < 5){
           this.followPower = true;
-		  setTimeOut(setFollowFalse,10000); //10sec
+		  setTimeout(this.setFollowFalse,10000); //10sec
         }else{
           this.followPower = false;
         }
         if(this.numEaten > 7 && this.numEaten < 30){
           this.forcePush = true;
-		  setTimeOut(setPushFalse,10000);
+		  setTimeout(this.setPushFalse,10000);
         }else{
           this.forcePush = false;
         }
