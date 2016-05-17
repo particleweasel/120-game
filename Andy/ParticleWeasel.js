@@ -280,7 +280,7 @@ $(document).ready(function () {
 
     gameScreen.init = function() {
         this.addChild(weasel);
-        createObstacles(30);
+        createObstacles(30, true);
         createProtons("left");
         createProtons("right");
         explosion = [];
@@ -380,6 +380,11 @@ $(document).ready(function () {
         this.running = false;
         this.type = Math.floor(Math.random()  * (14-5) + 5);
         this.image.src = sources[this.type];
+        
+        if(this.type == 5 || this.type == 8 || this.type == 7){
+            this.width *= 1.5;
+            this.height *= 1.5
+        }
 
         this.float = function() {
             if (this.y > 0 && this.period >= 0) {
@@ -444,8 +449,8 @@ $(document).ready(function () {
 
 
     //Called in game screen init.
-    function createObstacles(numObstacles) {
-        partObstacles = [];
+    function createObstacles(numObstacles, reset) {
+        if(reset)partObstacles = [];
         for(var i = 0; i < numObstacles; i++){
             partObstacles.push(new Particle(Math.random()*10, 5 - Math.random()*4,
                 Math.random()*w, canvas.height, 10, "red",10 ))
@@ -605,26 +610,22 @@ $(document).ready(function () {
     weasel.forcePush = false;
 
     weasel.update = function() {
-        /*if(this.numEaten > 2 && this.numEaten < 5){
-          this.followPower = true;
-        }else{
-          this.followPower = false;
-        } */
-        if(this.numEaten > 7 && this.numEaten < 30){
-          this.forcePush = true;
-        }else{
-          this.followPower = false;
-        }
         if(this.eaten.length == 2){
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
             
-            if(particle0 == particle1){
+            if(particle0 == 5 && particle1 == 7 ||
+                particle0 == 7 && particle1 == 5){
                 this.followPower = true;
+            }else{
+                this.followPower = false;
             }
             
-            if(particle0 != particle1){
+             if(particle0 == 8 && particle1 == 5 ||
+                particle0 == 5 && particle1 == 8){
                 this.forcePush = true;
+            }else{
+                this.forcePush= false;
             }
         }
         for(i in partObstacles){      
@@ -637,6 +638,7 @@ $(document).ready(function () {
                     this.eaten.push(partObstacles[i]);
                 } 
                 partObstacles.splice(i,1);
+                createObstacles(3, false);
             }
         }
 
@@ -646,9 +648,6 @@ $(document).ready(function () {
 
         }
 
-        if(this.numEaten > 2){
-            this.followPower = true;
-        }
 
         this.accel = 1.25;
 
