@@ -350,14 +350,14 @@ $(document).ready(function () {
             explosion[i].update();
         }
         for(i in weasel.eaten){
-          weasel.eaten[i].width = 100;
-          weasel.eaten[i].height = 100;
+          weasel.eaten[i].width = 50;
+          weasel.eaten[i].height = 50;
           if(i == 0){
             weasel.eaten[i].x = 10;
-            weasel.eaten[i].y = h-95;
+            weasel.eaten[i].y = h-50;
           }else{
-            weasel.eaten[i].x = 110;
-            weasel.eaten[i].y = h-95;
+            weasel.eaten[i].x = 60;
+            weasel.eaten[i].y = h-50;
           }
         }
         this.updateChildren();
@@ -373,7 +373,7 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].draw();
         }
-        ctx.fillRect(0, h - 100, w, h);
+        ctx.fillRect(0, h - 50, w, h);
         for(i in weasel.eaten){
           weasel.eaten[i].draw();
 
