@@ -349,6 +349,17 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].update();
         }
+        for(i in weasel.eaten){
+          weasel.eaten[i].width = 100;
+          weasel.eaten[i].height = 100;
+          if(i == 0){
+            weasel.eaten[i].x = 10;
+            weasel.eaten[i].y = h-95;
+          }else{
+            weasel.eaten[i].x = 110;
+            weasel.eaten[i].y = h-95;
+          }
+        }
         this.updateChildren();
     }
     gameScreen.draw = function() {
@@ -361,6 +372,11 @@ $(document).ready(function () {
         }
         for(i in explosion){
             explosion[i].draw();
+        }
+        ctx.fillRect(0, h - 100, w, h);
+        for(i in weasel.eaten){
+          weasel.eaten[i].draw();
+
         }
 
     }
@@ -443,7 +459,7 @@ $(document).ready(function () {
         } else {
             //console.log(this.type);
             this.image.src = sources[this.type];
-        } 
+        }
 
 
         if(this.type === "Powerup1" || this.type === "Powerup2" || this.type === "Powerup3"){
@@ -528,13 +544,13 @@ $(document).ready(function () {
                 type = Math.floor(Math.random() * 3);
                 console.log("Lessthan3:"+type);
                 switch(type) {
-                    case 0: 
+                    case 0:
                         type = "Powerup1";
                         break;
-                    case 1: 
+                    case 1:
                         type = "Powerup2";
                         break;
-                    case 2: 
+                    case 2:
                         type = "Powerup3";
                         break;
                 }
@@ -736,7 +752,7 @@ $(document).ready(function () {
             this.stopped = false;
             this.speed = .5;
         } else {
-            
+
         }
 
         this.move();
@@ -769,10 +785,12 @@ $(document).ready(function () {
     }
 
     weasel.draw = function() {
+
         this.center();
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         this.uncenter();
         this.drawChildren();
+
     }
 
     weasel.setFollowFalse = function(){
@@ -785,6 +803,9 @@ $(document).ready(function () {
           this.eaten = [];
           this.forcePush = false;
        }
+
+//----------------------Display for collected particles----------------------
+//----------------------------------------------------------------------
 
 
 //----------------------Different collision checks----------------------
