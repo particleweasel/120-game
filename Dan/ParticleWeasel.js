@@ -275,7 +275,7 @@ $(document).ready(function () {
     }
     menu.update = function() {
         if(clicked(this.children[0])) {
-            screenMan.push(gameScreen);
+            screenMan.push(tutScreen);
         }
     }
     menu.draw = function() {
@@ -283,12 +283,47 @@ $(document).ready(function () {
         this.drawChildren();
     }
 
+    var tutScreen = new Screen(true,true);
+    tutScreen.init = function() {
+        var background = new Sprite();
+        background.setSrc(sources.Background);
+        background.width = w;
+        background.height = h;
+        this.addChild(background);
 
+        this.addChild(weasel);
+        protonArray = [];
+        createProtons("left");
+        createProtons("right");
+        explosion = [];
+    }
+    tutScreen.update = function() {
+        console.log('calling');
+        for(i in protonArray){
+            protonArray[i].update();
+        }
+        for(i in explosion){
+            explosion[i].update();
+        }
+        this.updateChildren();
+    }
+    tutScreen.draw = function() {
+        this.drawChildren();
+        for(i in partObstacles){
+            partObstacles[i].draw();
+        }
+        for(i in protonArray){
+            protonArray[i].draw();
+        }
+        for(i in explosion){
+            explosion[i].draw();
+        }
+    }
     //----Game Screen-----------------\\
     var gameScreen = new Screen(true, true);
-    gameScreen.obstacles = new Array();
 
     gameScreen.init = function() {
+
         var background = new Sprite();
         background.setSrc(sources.Background);
         background.width = w;
@@ -297,8 +332,10 @@ $(document).ready(function () {
 
         this.addChild(weasel);
         createObstacles(30, true);
+        protonArray = [];
         createProtons("left");
         createProtons("right");
+
         explosion = [];
     }
     gameScreen.update = function() {
@@ -378,6 +415,7 @@ $(document).ready(function () {
 
     scoreScreen.update = function() {
         if(clicked(this.children[0])) {
+            screenMan.remove(tutScreen);
             screenMan.push(gameScreen);
         }
     }
@@ -522,7 +560,7 @@ $(document).ready(function () {
         this.side = side;
         this.radius = radius;
         this.target = target
-        this.image.src=sources.array[0];
+        this.image.src=sources.Proton;
         this.array = [];
         this.angle = 0;
     }
@@ -531,10 +569,10 @@ $(document).ready(function () {
 
     Proton.prototype.init = function() {
         if (this.side == "left") {
-            this.x = -5;
+            this.x = -15;
             this.y = h/4;
         } else {
-            this.x = w+5;
+            this.x = w;
             this.y = 3*(h/4);
             this.angle = 180;
         }
@@ -549,7 +587,7 @@ $(document).ready(function () {
             this.moveTowards(weasel);
           }else if(distance(this, weasel) > distance(protonArray[this.target], weasel)){
             this.moveTowards(protonArray[this.target]);
-            partObstacles[this.target].moveTowards(weasel);
+            protonArray[this.target].moveTowards(weasel);
           }
         }
         if(protonArray.length == 2 && !weasel.followPower){
@@ -565,8 +603,7 @@ $(document).ready(function () {
           }
         if(this.overlap(this, protonArray[this.target])){
             makeExplosion(40);
-            protonArray.pop();
-            protonArray.pop();
+            protonArray = [];
             protonCount = 1;
             weasel.init();
             gameScreen.children.pop();
@@ -598,10 +635,10 @@ $(document).ready(function () {
     //Called in game screen init
     function createProtons(side){
         if(side == "left"){
-            protonArray.push(new Proton(-30, h/4 ,2, "left", 15, protonCount));
+            protonArray.push(new Proton(-30, h/2 ,2, "left", 15, protonCount));
         }
         if(side == "right"){
-            protonArray.push(new Proton(w+5, 3*(h/4) ,2, "right", 15, protonCount));
+            protonArray.push(new Proton(w, h/2 ,2, "right", 15, protonCount));
         }
         protonCount--;
     }
@@ -698,7 +735,8 @@ $(document).ready(function () {
         if (mouseDowned && this.stopped == true) {
             this.stopped = false;
             this.speed = .5;
-
+        } else {
+            
         }
 
         this.move();
@@ -832,6 +870,9 @@ $(document).ready(function () {
         //ctx.fillText("bMaxX: " + bMaxX, 5, 30);
         //ctx.fillText("bMaxY: " + bMaxY, 5, 40);
         //ctx.fillText("pauseMusic " + pauseMusic, 5, 50);
+        ctx.fillText("Follow Power:" + weasel.followPower, 5, 10);
+        ctx.fillText("Push Power:" + weasel.forcePush, 5, 20);
+        ctx.fillText("Proton speed:" + protonArray[0].speed + " " + protonArray[1].speed, 5, 30);
     }
 
     //Update function
