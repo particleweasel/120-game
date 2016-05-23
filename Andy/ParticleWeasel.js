@@ -707,6 +707,7 @@ $(document).ready(function () {
     weasel.numEaten = 0;
     weasel.followPower = false;
     weasel.forcePush = false;
+    weasel.cooldown = false;
 
     weasel.init = function() {
         weasel.setFollowFalse();
@@ -719,19 +720,16 @@ $(document).ready(function () {
             particle1 = this.eaten[1].type;
 
             if(particle0 == "Powerup1" && particle1 == "Powerup2" ||
-                particle0 == "Powerup2" && particle1 == "Powerup1"){
+                particle0 == "Powerup2" && particle1 == "Powerup1"
+                ){
                 this.followPower = true;
                 setTimeout(this.setFollowFalse,5000); //5sec
-            }else{
-                this.followPower = false;
             }
 
              if(particle0 == "Powerup3" && particle1 == "Powerup1" ||
                 particle0 == "Powerup1" && particle1 == "Powerup3"){
                 this.forcePush = true;
                 setTimeout(this.setPushFalse,5000);
-            }else{
-                this.forcePush= false;
             }
         }
         for(i in partObstacles){
@@ -786,10 +784,10 @@ $(document).ready(function () {
 
     weasel.draw = function() {
         angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
-        this.center();
         ctx.translate(this.x, this.y);
         ctx.rotate(angle);
         ctx.translate(-this.x, -this.y);
+        this.center();
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.setTransform(1,0,0,1,0,0);
         this.uncenter();
@@ -799,12 +797,12 @@ $(document).ready(function () {
 
     weasel.setFollowFalse = function(){
         //console.log("setting false");
-        this.eaten = [];
+        weasel.eaten = [];
         this.followPower = false;
       }
 
     weasel.setPushFalse = function(){
-          this.eaten = [];
+          weasel.eaten = [];
           this.forcePush = false;
        }
 
