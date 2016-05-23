@@ -785,9 +785,13 @@ $(document).ready(function () {
     }
 
     weasel.draw = function() {
-
+        angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
         this.center();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(angle);
+        ctx.translate(-this.x, -this.y);
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.setTransform(1,0,0,1,0,0);
         this.uncenter();
         this.drawChildren();
 
