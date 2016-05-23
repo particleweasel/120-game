@@ -388,6 +388,8 @@ $(document).ready(function () {
         this.radius = radius;
         this.running = false;
         this.image.src = sources[Math.floor(Math.random()  * (14-5) + 5)];
+		this.xspeed = speed * Math.cos(period);
+		this.yspeed = speed * Math.sin(period);
 
         this.float = function() {
             if (this.y > 0 && this.period >= 0) {
@@ -413,23 +415,32 @@ $(document).ready(function () {
 		
 		this.drift = function() {
 			//past lower part and moving down
-			if(this.y > canvas.height && y.speed > 0){
-				this.x = Math.random() * canvas.width();
-				this.speed *= -1;
+			if(this.y > canvas.height && this.yspeed > 0){
+				//this.x = Math.random() * canvas.width();
+				this.period = Math.random() * 90;
+				this.yspeed *= -1;
 			}
 			//past upper part and moving up
-			else if(this.y < 0 && y.speed < 0){
-				this.x = Math.random() * canvas.width();
-				this.speed *= -1;
+			else if(this.y < 0 && this.yspeed < 0){
+				//this.x = Math.random() * canvas.width();
+				this.period = Math.random() * 90;				
+				this.yspeed *= -1;
 			}
 			//x equivalents
-			else if(this.x > canvas.width && x.speed > 0){
-				this.y = Math.random() * canvas.height();
-				this.speed *= -1;
+			else if(this.x > canvas.width && this.xspeed > 0){
+				//this.y = Math.random() * canvas.height();
+				this.period = Math.random() * 90;
+				this.xspeed *= -1;
 			}
-			else if(this.x < 0 && x.speed < 0){
-				this.y = Math.random() * canvas.height();
-				this.speed *= -1;
+			else if(this.x < 0 && this.xspeed < 0){
+				//this.y = Math.random() * canvas.height();
+				this.period = Math.random() * 90;
+				this.xspeed *= -1;
+			}
+			else{
+				this.x += this.xspeed;
+				this.y += this.yspeed;
+				
 			}
 		}
     }
@@ -440,7 +451,7 @@ $(document).ready(function () {
         //console.log(this.running);
         if(this.running) {
             this.moveAway(weasel);
-        } else this.float();
+        } else this.drift();
 
     }
 
