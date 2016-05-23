@@ -489,7 +489,7 @@ $(document).ready(function () {
         partObstacles = [];
         for(var i = 0; i < numObstacles; i++){
             partObstacles.push(new Particle(Math.random()*10, 5 - Math.random()*4,
-                Math.random()*w, canvas.height, 10, "red",10 ))
+                Math.random()*w, Math.random()*canvas.height, 10, "red",10 ))
         }
     }
     
