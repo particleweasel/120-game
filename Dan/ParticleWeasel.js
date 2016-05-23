@@ -17,8 +17,8 @@ $(document).ready(function () {
     var h = $("#canvas").height();
 
      //Audio variables
-    var aud = new Audio();
-    var pauseMusic = true;
+    var aud = new Audio("theme.mp3");
+    var pauseMusic = false;
     var highscore = 0;
 
 //----------------------Images----------------------------------
@@ -31,6 +31,7 @@ $(document).ready(function () {
         ResumeGame: "./images/ResumeGame.png",
         Weasel: "./images/Seal.png",
         Background: "./images/Background.png",
+        Controls: "./images/Controls.png",
         Proton: "./images/Particle6.png",
         Powerup1: "./images/Particle1.png",
         Powerup2: "./images/Particle3.png",
@@ -272,6 +273,15 @@ $(document).ready(function () {
         newGame.y = canvas.height/2 - 54;
         newGame.center();
         this.addChild(newGame);
+
+        control = new Sprite();
+        control.setSrc(sources.Controls);
+        control.width = 465;
+        control.height = 104;
+        control.x = 10;
+        control.y = canvas.height/2 + 50;
+        this.addChild(control);
+
     }
     menu.update = function() {
         if(clicked(this.children[0])) {
@@ -285,6 +295,7 @@ $(document).ready(function () {
 
     var tutScreen = new Screen(true,true);
     tutScreen.init = function() {
+        console.log("initializing");
         var background = new Sprite();
         background.setSrc(sources.Background);
         background.width = w;
@@ -293,12 +304,14 @@ $(document).ready(function () {
 
         this.addChild(weasel);
         protonArray = [];
+        protonCount = 1;
         createProtons("left");
         createProtons("right");
         explosion = [];
+        partObstacles = [];
     }
     tutScreen.update = function() {
-        console.log('calling');
+        //console.log('calling');
         for(i in protonArray){
             protonArray[i].update();
         }
@@ -333,6 +346,7 @@ $(document).ready(function () {
         this.addChild(weasel);
         createObstacles(30, true);
         protonArray = [];
+        protonCount = 1;
         createProtons("left");
         createProtons("right");
 
@@ -349,6 +363,17 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].update();
         }
+        for(i in weasel.eaten){
+          weasel.eaten[i].width = 50;
+          weasel.eaten[i].height = 50;
+          if(i == 0){
+            weasel.eaten[i].x = 10;
+            weasel.eaten[i].y = h-50;
+          }else{
+            weasel.eaten[i].x = 60;
+            weasel.eaten[i].y = h-50;
+          }
+        }
         this.updateChildren();
     }
     gameScreen.draw = function() {
@@ -361,6 +386,11 @@ $(document).ready(function () {
         }
         for(i in explosion){
             explosion[i].draw();
+        }
+        ctx.fillRect(0, h - 50, w, h);
+        for(i in weasel.eaten){
+          weasel.eaten[i].draw();
+
         }
 
     }
@@ -391,6 +421,7 @@ $(document).ready(function () {
 
     pauseScreen.update = function() {
         if(clicked(this.children[0])) {
+            screenMan.remove(tutScreen);
             screenMan.remove(gameScreen);
             screenMan.push(menu);
         }
@@ -443,7 +474,7 @@ $(document).ready(function () {
         } else {
             //console.log(this.type);
             this.image.src = sources[this.type];
-        } 
+        }
 
 
         if(this.type === "Powerup1" || this.type === "Powerup2" || this.type === "Powerup3"){
@@ -528,13 +559,13 @@ $(document).ready(function () {
                 type = Math.floor(Math.random() * 3);
                 console.log("Lessthan3:"+type);
                 switch(type) {
-                    case 0: 
+                    case 0:
                         type = "Powerup1";
                         break;
-                    case 1: 
+                    case 1:
                         type = "Powerup2";
                         break;
-                    case 2: 
+                    case 2:
                         type = "Powerup3";
                         break;
                 }
@@ -607,6 +638,7 @@ $(document).ready(function () {
             protonCount = 1;
             weasel.init();
             gameScreen.children.pop();
+            tutScreen.children.pop();
             screenMan.push(scoreScreen);
         }
        for(i in partObstacles){
@@ -736,7 +768,7 @@ $(document).ready(function () {
             this.stopped = false;
             this.speed = .5;
         } else {
-            
+
         }
 
         this.move();
@@ -769,10 +801,12 @@ $(document).ready(function () {
     }
 
     weasel.draw = function() {
+
         this.center();
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         this.uncenter();
         this.drawChildren();
+
     }
 
     weasel.setFollowFalse = function(){
@@ -785,6 +819,9 @@ $(document).ready(function () {
           this.eaten = [];
           this.forcePush = false;
        }
+
+//----------------------Display for collected particles----------------------
+//----------------------------------------------------------------------
 
 
 //----------------------Different collision checks----------------------
@@ -872,7 +909,7 @@ $(document).ready(function () {
         //ctx.fillText("pauseMusic " + pauseMusic, 5, 50);
         ctx.fillText("Follow Power:" + weasel.followPower, 5, 10);
         ctx.fillText("Push Power:" + weasel.forcePush, 5, 20);
-        ctx.fillText("Proton speed:" + protonArray[0].speed + " " + protonArray[1].speed, 5, 30);
+        //ctx.fillText("Proton speed:" + protonArray[0].speed + " " + protonArray[1].speed, 5, 30);
     }
 
     //Update function
