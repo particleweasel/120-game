@@ -472,6 +472,7 @@ $(document).ready(function () {
         this.xspeed = speed * Math.cos(period);
         this.yspeed = speed * Math.sin(period);
         this.style = Math.floor(Math.random()*2);
+        this.angle = 0;
 
         if(this.type == "obstacle") {
             this.type = Math.floor(Math.random()  * 7);
@@ -570,9 +571,9 @@ $(document).ready(function () {
             diffY = Coord.y - this.y;
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
-            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(angle * Math.PI/180) * this.speed;
-            this.y += Math.sin(angle * Math.PI/180) * this.speed;
+            this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            this.x += Math.cos(this.angle * Math.PI/180) * this.speed;
+            this.y += Math.sin(this.angle * Math.PI/180) * this.speed;
         }
 
     Particle.prototype.moveAway = function (Coord){
@@ -580,15 +581,14 @@ $(document).ready(function () {
             diffY = Coord.y - this.y;
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
-            angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(angle * Math.PI/180) * -this.speed;
-            this.y += Math.sin(angle * Math.PI/180) * -this.speed;
+            this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+            this.x += Math.cos(this.angle * Math.PI/180) * -this.speed;
+            this.y += Math.sin(this.angle * Math.PI/180) * -this.speed;
         }
 
-    Particle.prototype.move = function (a) {
-        var angle = a;
-        this.x += Math.cos(angle * Math.PI/180) * this.speed;
-        this.y += Math.sin(angle * Math.PI/180) * this.speed;
+    Particle.prototype.move = function () {
+        this.x += Math.cos(this.angle * Math.PI/180) * this.speed;
+        this.y += Math.sin(this.angle * Math.PI/180) * this.speed;
     }
 
     //Called in game screen init.
@@ -613,7 +613,7 @@ $(document).ready(function () {
                 }
             } else type = "obstacle";
             partObstacles.push(new Particle(Math.random()*10, 5 - Math.random()*4,
-                Math.random()*w, canvas.height, 10, "red",10, type))
+                Math.random()*w, Math.random()*h, 10, "red",10, type))
         }
     }
 
@@ -663,7 +663,7 @@ $(document).ready(function () {
         }
         if(protonArray.length == 2 && !weasel.followPower){
             //this.moveTowards(protonArray[this.target]);
-            this.move(this.angle);
+            this.move();
         }
         if(weasel.forcePush) {
           for(i in partObstacles){
@@ -710,7 +710,7 @@ $(document).ready(function () {
             protonArray.push(new Proton(-30, h/2 ,2, "left", 15, protonCount));
         }
         if(side == "right"){
-            protonArray.push(new Proton(w, h/2 ,2, "right", 15, protonCount));
+            protonArray.push(new Proton(w-5, h/2 ,2, "right", 15, protonCount));
         }
         protonCount--;
     }
@@ -763,6 +763,7 @@ $(document).ready(function () {
     weasel.numEaten = 0;
     weasel.followPower = false;
     weasel.forcePush = false;
+    weasel.angle = 0;
 
     weasel.init = function() {
         weasel.setFollowFalse();
@@ -832,18 +833,18 @@ $(document).ready(function () {
             this.speed = 0;
         }
         this.uncenter();
-        angle = Math.atan2(diffY, diffX)*180 / Math.PI
+        this.angle = Math.atan2(diffY, diffX)*180 / Math.PI
 
         this.speed = this.speed * this.accel;
 
-        this.x += Math.cos(angle * Math.PI/180) * this.speed;
-        this.y += Math.sin(angle * Math.PI/180) * this.speed;
+        this.x += Math.cos(this.angle * Math.PI/180) * this.speed;
+        this.y += Math.sin(this.angle * Math.PI/180) * this.speed;
     }
 
     weasel.draw = function() {
-        angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
+        this.angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
         ctx.translate(this.x, this.y);
-        ctx.rotate(angle);
+        ctx.rotate(this.angle);
         ctx.translate(-this.x, -this.y);
         this.center();
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
