@@ -21,6 +21,33 @@ $(document).ready(function () {
     var pauseMusic = true;
     var highscore = 0;
 
+
+
+//----------------------Randomly selecting power up Partcles----------------------------------
+//-----------------------------------------------------------------------
+
+  var initialParticles = new Array();
+  var powerParticles = new Array();
+  initialParticles.push("./images/Particle1.png");
+  initialParticles.push("./images/Particle3.png");
+  initialParticles.push("./images/Particle4.png");
+  initialParticles.push("./images/Particle2.png");
+  initialParticles.push("./images/Particle7.png");
+  initialParticles.push("./images/Particle8.png");
+  initialParticles.push("./images/Particle9.png");
+  initialParticles.push("./images/Particle10.png");
+  initialParticles.push("./images/Particle12.png");
+  initialParticles.push("./images/Particle13.png");
+
+
+  for(var i = 0; i < 3; i++){
+    p = Math.round(Math.random()*(initialParticles.length-1));
+    powerParticles.push(initialParticles[p]);
+    initialParticles.splice(p, 1);
+  }
+
+
+
 //----------------------Images----------------------------------
 //-----------------------------------------------------------------------
     //Source image array
@@ -32,20 +59,16 @@ $(document).ready(function () {
         Weasel: "./images/Seal.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
-        Powerup1: "./images/Particle1.png",
-        Powerup2: "./images/Particle3.png",
-        Powerup3: "./images/Particle4.png",
+        Powerup1: powerParticles[0],
+        Powerup2: powerParticles[1],
+        Powerup3: powerParticles[2],
         Obstacle: "obstacle",
         array: []
     }
 
-    sources.array.push("./images/Particle2.png");
-    sources.array.push("./images/Particle7.png");
-    sources.array.push("./images/Particle8.png");
-    sources.array.push("./images/Particle9.png");
-    sources.array.push("./images/Particle10.png");
-    sources.array.push("./images/Particle12.png");
-    sources.array.push("./images/Particle13.png");
+    for(var i = 0; i < initialParticles.length; i++){
+      sources.array.push(initialParticles[i]);
+    }
 
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
