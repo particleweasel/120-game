@@ -349,7 +349,9 @@ $(document).ready(function () {
         protonCount = 1;
         createProtons("left");
         createProtons("right");
-
+        for (var i in protonArray) {
+            protonArray[i].init();
+        }
         explosion = [];
     }
     gameScreen.update = function() {
@@ -467,6 +469,9 @@ $(document).ready(function () {
         this.radius = radius;
         this.running = false;
         this.type = type;
+        this.xspeed = speed * Math.cos(period);
+        this.yspeed = speed * Math.sin(period);
+        this.style = Math.floor(Math.random()*2);
 
         if(this.type == "obstacle") {
             this.type = Math.floor(Math.random()  * 7);
@@ -503,16 +508,53 @@ $(document).ready(function () {
                 this.period = 10;
             }
         }
+
+        this.drift = function() {
+            //past lower part and moving down
+            if(this.y > canvas.height && this.yspeed > 0){
+                //this.x = Math.random() * canvas.width();
+                this.period = Math.random() * 90;
+                this.yspeed *= -1;
+            }
+            //past upper part and moving up
+            else if(this.y < 0 && this.yspeed < 0){
+                //this.x = Math.random() * canvas.width();
+                this.period = Math.random() * 90;               
+                this.yspeed *= -1;
+            }
+            //x equivalents
+            else if(this.x > canvas.width && this.xspeed > 0){
+                //this.y = Math.random() * canvas.height();
+                this.period = Math.random() * 90;
+                this.xspeed *= -1;
+            }
+            else if(this.x < 0 && this.xspeed < 0){
+                //this.y = Math.random() * canvas.height();
+                this.period = Math.random() * 90;
+                this.xspeed *= -1;
+            }
+            else{
+                this.x += this.xspeed;
+                this.y += this.yspeed;
+                
+            }
+        }
     }
 
     Particle.prototype = new Sprite();
 
     Particle.prototype.update = function() {
         //console.log(this.running);
+        if(!weasel.forcePush) this.running = false;
         if(this.running) {
             this.moveAway(weasel);
-        } else this.float();
-
+        } else {
+            if(this.style == 0) {
+                this.drift();
+            } else {
+                this.float();
+            }
+        }
     }
 
 /*    Particle.prototype.draw = function() {
@@ -613,13 +655,11 @@ $(document).ready(function () {
         if(weasel.followPower == true){
           //console.log(distance(this,weasel));
           //console.log(distance(partObstacles[this.target], weasel));
-          if(distance(this, weasel) < distance(protonArray[this.target], weasel)){
-            protonArray[this.target].moveTowards(this);
-            this.moveTowards(weasel);
-          }else if(distance(this, weasel) > distance(protonArray[this.target], weasel)){
-            this.moveTowards(protonArray[this.target]);
-            protonArray[this.target].moveTowards(weasel);
-          }
+            if(distance(this, weasel) < 500 && distance(protonArray[this.target], this) > 150){
+                this.moveTowards(weasel);
+            } else if(distance(protonArray[this.target], this) < 150){
+                this.moveTowards(protonArray[this.target]);
+            }
         }
         if(protonArray.length == 2 && !weasel.followPower){
             //this.moveTowards(protonArray[this.target]);
