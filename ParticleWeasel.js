@@ -786,8 +786,6 @@ $(document).ready(function () {
     weasel.followPower = false;
     weasel.forcePush = false;
     weasel.angle = 0;
-    weasel.followCooldown = setTimeout(weasel.setFollowFalse,5000); //5sec
-    weasel.pushCooldown = setTimeout(weasel.setPushFalse,5000);
 
     weasel.init = function() {
         weasel.setFollowFalse();
@@ -802,13 +800,13 @@ $(document).ready(function () {
             if(particle0 == "Powerup1" && particle1 == "Powerup2" ||
                 particle0 == "Powerup2" && particle1 == "Powerup1"){
                 this.followPower = true;
-                this.followCooldown;   
+                setTimeout(weasel.setFollowFalse,5000); //5sec   
             }
 
              if(particle0 == "Powerup3" && particle1 == "Powerup1" ||
                 particle0 == "Powerup1" && particle1 == "Powerup3"){
                 this.forcePush = true;
-                this.pushCooldown;
+                setTimeout(weasel.setPushFalse,5000);
             }
         }
         for(i in partObstacles){
