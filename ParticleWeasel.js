@@ -51,6 +51,7 @@ $(document).ready(function () {
     //@todo: add obstacle and proton images
     var sources = {
         NewGame: "./images/NewGame.png",
+        Controls: "./images/Controls.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
         Weasel: "./images/Seal.png",
