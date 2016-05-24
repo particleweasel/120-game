@@ -619,7 +619,7 @@ $(document).ready(function () {
             type = Math.floor(Math.random() * 11);
             if (type < 3) {
                 type = Math.floor(Math.random() * 3);
-                console.log("Lessthan3:"+type);
+               // console.log("Lessthan3:"+type);
                 switch(type) {
                     case 0:
                         type = "Powerup1";
@@ -786,6 +786,8 @@ $(document).ready(function () {
     weasel.followPower = false;
     weasel.forcePush = false;
     weasel.angle = 0;
+    weasel.followCooldown = setTimeout(weasel.setFollowFalse,5000); //5sec
+    weasel.pushCooldown = setTimeout(weasel.setPushFalse,5000);
 
     weasel.init = function() {
         weasel.setFollowFalse();
@@ -800,17 +802,13 @@ $(document).ready(function () {
             if(particle0 == "Powerup1" && particle1 == "Powerup2" ||
                 particle0 == "Powerup2" && particle1 == "Powerup1"){
                 this.followPower = true;
-                setTimeout(this.setFollowFalse,5000); //5sec
-            }else{
-                this.followPower = false;
+                this.followCooldown;   
             }
 
              if(particle0 == "Powerup3" && particle1 == "Powerup1" ||
                 particle0 == "Powerup1" && particle1 == "Powerup3"){
                 this.forcePush = true;
-                setTimeout(this.setPushFalse,5000);
-            }else{
-                this.forcePush= false;
+                this.pushCooldown;
             }
         }
         for(i in partObstacles){
@@ -877,16 +875,16 @@ $(document).ready(function () {
     }
 
     weasel.setFollowFalse = function(){
-        //console.log("setting false");
+    	console.log("Setting False");
         this.eaten = [];
         this.followPower = false;
       }
 
     weasel.setPushFalse = function(){
-          this.eaten = [];
+          console.log("Setting False");
+    	  this.eaten = [];
           this.forcePush = false;
        }
-
 //----------------------Display for collected particles----------------------
 //----------------------------------------------------------------------
 
