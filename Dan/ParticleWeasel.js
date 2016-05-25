@@ -21,32 +21,52 @@ $(document).ready(function () {
     var pauseMusic = false;
     var highscore = 0;
 
+
+//----------------------Randomly selecting power up Partcles----------------------------------
+//-----------------------------------------------------------------------
+
+  var initialParticles = new Array();
+  var powerParticles = new Array();
+  initialParticles.push("./images/Particle1.png");
+  initialParticles.push("./images/Particle3.png");
+  initialParticles.push("./images/Particle4.png");
+  initialParticles.push("./images/Particle2.png");
+  initialParticles.push("./images/Particle7.png");
+  initialParticles.push("./images/Particle8.png");
+  initialParticles.push("./images/Particle9.png");
+  initialParticles.push("./images/Particle10.png");
+  initialParticles.push("./images/Particle12.png");
+  initialParticles.push("./images/Particle13.png");
+
+
+  for(var i = 0; i < 3; i++){
+    p = Math.round(Math.random()*(initialParticles.length-1));
+    powerParticles.push(initialParticles[p]);
+    initialParticles.splice(p, 1);
+  }
+  
 //----------------------Images----------------------------------
 //-----------------------------------------------------------------------
     //Source image array
     //@todo: add obstacle and proton images
     var sources = {
         NewGame: "./images/NewGame.png",
+        Controls: "./images/Controls.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
-        Weasel: "./images/Seal.png",
+        Weasel: "./images/WeaselOpen.png",
         Background: "./images/Background.png",
-        Controls: "./images/Controls.png",
         Proton: "./images/Particle6.png",
-        Powerup1: "./images/Particle1.png",
-        Powerup2: "./images/Particle3.png",
-        Powerup3: "./images/Particle4.png",
+        Powerup1: powerParticles[0],
+        Powerup2: powerParticles[1],
+        Powerup3: powerParticles[2],
         Obstacle: "obstacle",
         array: []
     }
 
-    sources.array.push("./images/Particle2.png");
-    sources.array.push("./images/Particle7.png");
-    sources.array.push("./images/Particle8.png");
-    sources.array.push("./images/Particle9.png");
-    sources.array.push("./images/Particle10.png");
-    sources.array.push("./images/Particle12.png");
-    sources.array.push("./images/Particle13.png");
+    for(var i = 0; i < initialParticles.length; i++){
+      sources.array.push(initialParticles[i]);
+    }
 
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
@@ -489,23 +509,23 @@ $(document).ready(function () {
         }
 
         this.float = function() {
-            if (this.y > 0 && this.period >= 0) {
-                this.y -= this.speed;
-                this.x += this.speed * .3;
+            if (this.x > 0 && this.period >= 0) {
+                this.x -= this.speed;
+                this.y += this.speed * .3;
                 this.period--;
                 if (this.period == 0) {
                     this.period = -10;
                 }
-            } else if (this.y > 0 && this.period < 0) {
-                this.y -= this.speed;
-                this.x -= this.speed * .3;
+            } else if (this.x > 0 && this.period < 0) {
+                this.x -= this.speed;
+                this.y -= this.speed * .3;
                 this.period++;
                 if (this.period == 0) {
                     this,period = 10;
                 }
             } else {
-                this.y = h;
-                this.x = Math.random() * w;
+                this.x = h;
+                this.y = Math.random() * w;
                 this.period = 10;
             }
         }
@@ -599,7 +619,7 @@ $(document).ready(function () {
             type = Math.floor(Math.random() * 11);
             if (type < 3) {
                 type = Math.floor(Math.random() * 3);
-                console.log("Lessthan3:"+type);
+               // console.log("Lessthan3:"+type);
                 switch(type) {
                     case 0:
                         type = "Powerup1";
@@ -612,7 +632,7 @@ $(document).ready(function () {
                         break;
                 }
             } else type = "obstacle";
-            partObstacles.push(new Particle(Math.random()*10, 5 - Math.random()*4,
+            partObstacles.push(new Particle(Math.random()*10, 20 - Math.random()*4,
                 Math.random()*w, Math.random()*h, 10, "red",10, type))
         }
     }
@@ -659,6 +679,8 @@ $(document).ready(function () {
                 this.moveTowards(weasel);
             } else if(distance(protonArray[this.target], this) < 150){
                 this.moveTowards(protonArray[this.target]);
+            }else{
+            	this.move(this.angle);
             }
         }
         if(protonArray.length == 2 && !weasel.followPower){
@@ -778,17 +800,13 @@ $(document).ready(function () {
             if(particle0 == "Powerup1" && particle1 == "Powerup2" ||
                 particle0 == "Powerup2" && particle1 == "Powerup1"){
                 this.followPower = true;
-                setTimeout(this.setFollowFalse,5000); //5sec
-            }else{
-                this.followPower = false;
+                setTimeout(weasel.setFollowFalse,5000); //5sec   
             }
 
              if(particle0 == "Powerup3" && particle1 == "Powerup1" ||
                 particle0 == "Powerup1" && particle1 == "Powerup3"){
                 this.forcePush = true;
-                setTimeout(this.setPushFalse,5000);
-            }else{
-                this.forcePush= false;
+                setTimeout(weasel.setPushFalse,5000);
             }
         }
         for(i in partObstacles){
@@ -855,16 +873,16 @@ $(document).ready(function () {
     }
 
     weasel.setFollowFalse = function(){
-        //console.log("setting false");
+    	console.log("Setting False");
         this.eaten = [];
         this.followPower = false;
       }
 
     weasel.setPushFalse = function(){
-          this.eaten = [];
+          console.log("Setting False");
+    	  this.eaten = [];
           this.forcePush = false;
        }
-
 //----------------------Display for collected particles----------------------
 //----------------------------------------------------------------------
 
