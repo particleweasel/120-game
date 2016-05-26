@@ -698,7 +698,7 @@ $(document).ready(function () {
             }
           }
         if(this.overlap(this, protonArray[this.target])){
-            makeExplosion(40);
+            makeExplosion((weasel.score/1000) + 40);
             protonArray = [];
             protonCount = 1;
             weasel.init();
@@ -794,6 +794,7 @@ $(document).ready(function () {
     weasel.followPower = false;
     weasel.forcePush = false;
     weasel.angle = 0;
+    weasel.score = 0;
 
     weasel.init = function() {
         this.followPower = false;
@@ -807,12 +808,14 @@ $(document).ready(function () {
 
             if(particle0 == "Powerup1" || particle1 == "Powerup1"){
                 this.followPower = true;
+                this.score += 100;
                 followPowerTime = setTimeout(function() {setFollowFalse();}
                                   ,5000); //5sec
             }
 
              if(particle0 == "Powerup3" || particle1 == "Powerup3"){
                 this.forcePush = true;
+                this.score += 100;
                 pushPowerTime = setTimeout(function() {setPushFalse();}
                                 ,5000);
             }
@@ -821,8 +824,12 @@ $(document).ready(function () {
             if(overlap(this, partObstacles[i])){
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
+                	this.score += 5;
+                	console.log(this.score);
                     this.eaten.push(partObstacles[i]);
-                } else if(this.eaten.length = 2){
+                } else if(this.eaten.length == 2){
+                	this.score += 5
+                	console.log(this.score);
                     this.eaten.pop();
                     this.eaten.unshift(partObstacles[i]);
                 }
