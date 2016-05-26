@@ -17,7 +17,7 @@ $(document).ready(function () {
     var h = $("#canvas").height();
 
      //Audio variables
-    var aud = new Audio("theme.mp3");
+    var aud = new Audio();
     var pauseMusic = false;
     var highscore = 0;
 
@@ -364,7 +364,7 @@ $(document).ready(function () {
         this.addChild(background);
 
         this.addChild(weasel);
-        createObstacles(30, true);
+        createObstacles(100, true);
         protonArray = [];
         protonCount = 1;
         createProtons("left");
@@ -504,8 +504,11 @@ $(document).ready(function () {
 
 
         if(this.type === "Powerup1" || this.type === "Powerup2" || this.type === "Powerup3"){
-            this.width *= 1.5;
-            this.height *= 1.5
+            this.width *= 3;
+            this.height *= 3;
+            this.speed *= 2;
+            this.xspeed *= 2;
+            this.yspeed *= 2;
         }
 
         this.float = function() {
@@ -616,7 +619,7 @@ $(document).ready(function () {
         var type;
         if(reset)partObstacles = [];
         for(var i = 0; i < numObstacles; i++){
-            type = Math.floor(Math.random() * 11);
+            type = Math.floor(Math.random() * 40);
             if (type < 3) {
                 type = Math.floor(Math.random() * 3);
                // console.log("Lessthan3:"+type);
@@ -632,8 +635,8 @@ $(document).ready(function () {
                         break;
                 }
             } else type = "obstacle";
-            partObstacles.push(new Particle(Math.random()*10, 20 - Math.random()*4,
-                Math.random()*w, Math.random()*h, 10, "red",10, type))
+            partObstacles.push(new Particle(Math.random()*10, 5 - Math.random()*4,
+                Math.random()*w, Math.random()*h, 10, "red",5, type))
         }
     }
 
@@ -680,7 +683,7 @@ $(document).ready(function () {
             } else if(distance(protonArray[this.target], this) < 150){
                 this.moveTowards(protonArray[this.target]);
             }else{
-            	this.move(this.angle);
+                this.move(this.angle);
             }
         }
         if(protonArray.length == 2 && !weasel.followPower){
@@ -729,10 +732,10 @@ $(document).ready(function () {
     //Called in game screen init
     function createProtons(side){
         if(side == "left"){
-            protonArray.push(new Proton(-30, h/2 ,2, "left", 15, protonCount));
+            protonArray.push(new Proton(-30, h/2 ,2, "left", 25, protonCount));
         }
         if(side == "right"){
-            protonArray.push(new Proton(w-5, h/2 ,2, "right", 15, protonCount));
+            protonArray.push(new Proton(w-5, h/2 ,2, "right", 25, protonCount));
         }
         protonCount--;
     }
@@ -768,6 +771,11 @@ $(document).ready(function () {
         }
     }
 
+//----------------------PowerUp Timer---------------------------------
+//----------------------------------------------------------------------------
+
+    var followPowerTime;
+    var pushPowerTime;
 
 
 //----------------------Weasel Implementation---------------------------------
@@ -788,8 +796,8 @@ $(document).ready(function () {
     weasel.angle = 0;
 
     weasel.init = function() {
-        weasel.setFollowFalse();
-        weasel.setPushFalse();
+        this.followPower = false;
+        this.forcePush = false;
     }
 
     weasel.update = function() {
@@ -797,18 +805,18 @@ $(document).ready(function () {
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
 
-            if(particle0 == "Powerup1" && particle1 == "Powerup2" ||
-                particle0 == "Powerup2" && particle1 == "Powerup1"){
+            if(particle0 == "Powerup1" || particle1 == "Powerup1"){
                 this.followPower = true;
-                setTimeout(weasel.setFollowFalse,5000); //5sec   
+                followPowerTime = setTimeout(function() {setFollowFalse();}
+                                  ,5000); //5sec
             }
 
-             if(particle0 == "Powerup3" && particle1 == "Powerup1" ||
-                particle0 == "Powerup1" && particle1 == "Powerup3"){
+             if(particle0 == "Powerup3" || particle1 == "Powerup3"){
                 this.forcePush = true;
-                setTimeout(weasel.setPushFalse,5000);
+                pushPowerTime = setTimeout(function() {setPushFalse();}
+                                ,5000);
             }
-        }
+        }else this.init;
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
                 //console.log(partObstacles[i].type);
@@ -851,7 +859,7 @@ $(document).ready(function () {
             this.speed = 0;
         }
         this.uncenter();
-        this.angle = Math.atan2(diffY, diffX)*180 / Math.PI
+        this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
 
         this.speed = this.speed * this.accel;
 
@@ -872,17 +880,19 @@ $(document).ready(function () {
 
     }
 
-    weasel.setFollowFalse = function(){
-    	console.log("Setting False");
-        this.eaten = [];
-        this.followPower = false;
-      }
+    function setFollowFalse(){
+        console.log("Setting False");
+        weasel.eaten.length = 0;
+        weasel.followPower = false;
+        clearTimeout(followPowerTime);
+    }
 
-    weasel.setPushFalse = function(){
-          console.log("Setting False");
-    	  this.eaten = [];
-          this.forcePush = false;
-       }
+    function setPushFalse() {
+        console.log("Setting False");
+        weasel.eaten.length = 0;
+        weasel.forcePush = false;
+        clearTimeout(pushPowerTime);
+    }
 //----------------------Display for collected particles----------------------
 //----------------------------------------------------------------------
 
