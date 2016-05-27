@@ -698,7 +698,7 @@ $(document).ready(function () {
             }
           }
         if(this.overlap(this, protonArray[this.target])){
-            makeExplosion((weasel.score/1000) + 40);
+            makeExplosion((weasel.score/100) + 40);
             protonArray = [];
             protonCount = 1;
             weasel.init();
@@ -744,7 +744,7 @@ $(document).ready(function () {
 //----------------------Particle System for Win Condition--------------
 //--------------------------------------------------------------------------
     var explosion = [];
-    function explosionParticle(x, y, radius, vSpeed, hSpeed){
+    function explosionParticle(x, y, radius, vSpeed, hSpeed,speed){
         Sprite.call(this);
         this.x = x;
         this.y = y;
@@ -754,13 +754,15 @@ $(document).ready(function () {
         this.vSpeed = vSpeed;
         this.hSpeed = hSpeed;
         this.image.src = sources.array[Math.floor(Math.random()  * 7)];
+       	this.speed = Math.random()*17 + 10;
     }
 
     explosionParticle.prototype = new Particle();
 
     explosionParticle.prototype.update = function(){
-      this.x += this.hSpeed;
-      this.y += this.vSpeed;
+      
+      this.x += this.hSpeed*this.speed;
+      this.y += this.vSpeed*this.speed;
     }
 
     function makeExplosion(numParticles){
@@ -794,7 +796,7 @@ $(document).ready(function () {
     weasel.followPower = false;
     weasel.forcePush = false;
     weasel.angle = 0;
-    weasel.score = 0;
+    weasel.score = 5000;
 
     weasel.init = function() {
         this.followPower = false;
