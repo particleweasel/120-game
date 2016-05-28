@@ -17,9 +17,10 @@ $(document).ready(function () {
     var h = $("#canvas").height();
 
      //Audio variables
-    var aud = new Audio();
+    var aud = new Audio("theme.mp3");
+    aud.volume = 0.1;
+    var audPower = new Audio("Powerup12.wav");
     var pauseMusic = false;
-    var highscore = 0;
 
 
 //----------------------Randomly selecting power up Partcles----------------------------------
@@ -51,7 +52,8 @@ $(document).ready(function () {
     //@todo: add obstacle and proton images
     var sources = {
         NewGame: "./images/NewGame.png",
-        Controls: "./images/Controls.png",
+        StartGame: "./images/StartGame.png",
+        StartScreen: "./images/StartScreen.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
         Weasel: "./images/WeaselOpen.png",
@@ -281,35 +283,33 @@ $(document).ready(function () {
     var menu = new Screen(false,false);
     screenMan.push(menu);
     menu.init = function() {
+        control = new Sprite();
+        control.setSrc(sources.StartScreen);
+        control.width = w;
+        control.height = h;
+        control.x = 0;
+        control.y = 0;
+        this.addChild(control);
+
         //console.log("initializing");
         var newGame = new Sprite();
         newGame.name = "New Game"
         newGame.image = new Image();
         //console.log(sources.NewGame);
-        newGame.image.src = sources.NewGame;
+        newGame.image.src = sources.StartGame;
         newGame.width = 224;
         newGame.height = 34;
         newGame.x = canvas.width/2;
         newGame.y = canvas.height/2 - 54;
         newGame.center();
         this.addChild(newGame);
-
-        control = new Sprite();
-        control.setSrc(sources.Controls);
-        control.width = 465;
-        control.height = 104;
-        control.x = 10;
-        control.y = canvas.height/2 + 50;
-        this.addChild(control);
-
     }
     menu.update = function() {
-        if(clicked(this.children[0])) {
+        if(clicked(this.children[1])) {
             screenMan.push(tutScreen);
         }
     }
     menu.draw = function() {
-        ctx.fillText("Highscore: "+highscore, canvas.width/2,10);
         this.drawChildren();
     }
 
@@ -351,6 +351,11 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].draw();
         }
+        ctx.save();
+        ctx.fillStyle = "red";
+        ctx.font = "48px Serif";
+        ctx.fillText("The Weasel Likes Explosions", w/2, 50);
+        ctx.restore();
     }
     //----Game Screen-----------------\\
     var gameScreen = new Screen(true, true);
@@ -605,8 +610,8 @@ $(document).ready(function () {
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
             this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(this.angle * Math.PI/180) * -this.speed;
-            this.y += Math.sin(this.angle * Math.PI/180) * -this.speed;
+            this.x += Math.cos(this.angle * Math.PI/180) * -this.speed*2;
+            this.y += Math.sin(this.angle * Math.PI/180) * -this.speed*2;
         }
 
     Particle.prototype.move = function () {
@@ -652,7 +657,7 @@ $(document).ready(function () {
         this.y = y;
         this.width = radius*2;
         this.height = radius*2;
-        this.speed = 5;
+        this.speed = 10;
         this.side = side;
         this.radius = radius;
         this.target = target
@@ -665,10 +670,10 @@ $(document).ready(function () {
 
     Proton.prototype.init = function() {
         if (this.side == "left") {
-            this.x = -15;
+            this.x = 0;
             this.y = h/4;
         } else {
-            this.x = w;
+            this.x = w-50;
             this.y = 3*(h/4);
             this.angle = 180;
         }
@@ -698,7 +703,7 @@ $(document).ready(function () {
             }
           }
         if(this.overlap(this, protonArray[this.target])){
-            makeExplosion(40);
+            makeExplosion((weasel.score/100) + 40);
             protonArray = [];
             protonCount = 1;
             weasel.init();
@@ -711,8 +716,8 @@ $(document).ready(function () {
                 this.angle += Math.random()*720;
             }
         }
-        if(this.x < -50 || this.x > w+50 || this.y < -50 || this.y > h+50) {
-            this.angle += 180;
+        if(this.x < 0 || this.x+this.width > w || this.y < 0 || this.y+this.height > h) {
+            this.angle -= 90;
         }
     }
 
@@ -732,10 +737,10 @@ $(document).ready(function () {
     //Called in game screen init
     function createProtons(side){
         if(side == "left"){
-            protonArray.push(new Proton(-30, h/2 ,2, "left", 25, protonCount));
+            protonArray.push(new Proton(0, h/2 ,2, "left", 25, protonCount));
         }
         if(side == "right"){
-            protonArray.push(new Proton(w-5, h/2 ,2, "right", 25, protonCount));
+            protonArray.push(new Proton(w-50, h/2 ,2, "right", 25, protonCount));
         }
         protonCount--;
     }
@@ -744,7 +749,7 @@ $(document).ready(function () {
 //----------------------Particle System for Win Condition--------------
 //--------------------------------------------------------------------------
     var explosion = [];
-    function explosionParticle(x, y, radius, vSpeed, hSpeed){
+    function explosionParticle(x, y, radius, vSpeed, hSpeed, speed){
         Sprite.call(this);
         this.x = x;
         this.y = y;
@@ -754,13 +759,14 @@ $(document).ready(function () {
         this.vSpeed = vSpeed;
         this.hSpeed = hSpeed;
         this.image.src = sources.array[Math.floor(Math.random()  * 7)];
+        this.speed = Math.random()*17 + 10;
     }
 
     explosionParticle.prototype = new Particle();
 
     explosionParticle.prototype.update = function(){
-      this.x += this.hSpeed;
-      this.y += this.vSpeed;
+      this.x += this.hSpeed*this.speed;
+      this.y += this.vSpeed*this.speed;
     }
 
     function makeExplosion(numParticles){
@@ -794,10 +800,12 @@ $(document).ready(function () {
     weasel.followPower = false;
     weasel.forcePush = false;
     weasel.angle = 0;
+    weasel.score = 5000;
 
     weasel.init = function() {
         this.followPower = false;
         this.forcePush = false;
+        this.score = 5000;
     }
 
     weasel.update = function() {
@@ -807,12 +815,14 @@ $(document).ready(function () {
 
             if(particle0 == "Powerup1" || particle1 == "Powerup1"){
                 this.followPower = true;
+                this.score += 100;
                 followPowerTime = setTimeout(function() {setFollowFalse();}
                                   ,5000); //5sec
             }
 
              if(particle0 == "Powerup3" || particle1 == "Powerup3"){
                 this.forcePush = true;
+                this.score += 100;
                 pushPowerTime = setTimeout(function() {setPushFalse();}
                                 ,5000);
             }
@@ -821,8 +831,10 @@ $(document).ready(function () {
             if(overlap(this, partObstacles[i])){
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
+                    this.score += 5;
                     this.eaten.push(partObstacles[i]);
                 } else if(this.eaten.length = 2){
+                    this.score += 5;
                     this.eaten.pop();
                     this.eaten.unshift(partObstacles[i]);
                 }
