@@ -54,7 +54,8 @@ $(document).ready(function () {
         Controls: "./images/Controls.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
-        Weasel: "./images/WeaselClosed.png",
+        WeaselClosed: "./images/WeaselClosed.png",
+        WeaselOpened: "./images/WeaselOpen.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
         Powerup1: powerParticles[0],
@@ -67,6 +68,8 @@ $(document).ready(function () {
     for(var i = 0; i < initialParticles.length; i++){
       sources.array.push(initialParticles[i]);
     }
+
+
 
     //----------------------Mouse/Keyboard Functions----------------------------------
     //-----------------------------------------------------------------------
@@ -569,6 +572,9 @@ $(document).ready(function () {
 
     Particle.prototype.update = function() {
         //console.log(this.running);
+        if(this.type === "Powerup1" || this.type === "Powerup2" || this.type === "Powerup3"){
+          //I'd like to include a glow here
+        }
         if(!weasel.forcePush) this.running = false;
         if(this.running) {
             this.moveAway(weasel);
@@ -784,7 +790,7 @@ $(document).ready(function () {
 //----------------------------------------------------------------------------
     var weasel = new Sprite();
     weasel.image = new Image();
-    weasel.setSrc(sources.Weasel);
+    weasel.setSrc(sources.WeaselClosed);
     weasel.x = canvas.width/2;
     weasel.y = canvas.height/2;
     weasel.center();
@@ -796,7 +802,11 @@ $(document).ready(function () {
     weasel.followPower = false;
     weasel.forcePush = false;
     weasel.angle = 0;
+<<<<<<< HEAD
+    weasel.closed = true;
+=======
     weasel.score = 5000;
+>>>>>>> 22092320c51f8904322f4c5e37306e69787f542f
 
     weasel.init = function() {
         this.followPower = false;
@@ -804,7 +814,9 @@ $(document).ready(function () {
     }
 
     weasel.update = function() {
+
         if(this.eaten.length == 2){
+
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
 
@@ -825,6 +837,7 @@ $(document).ready(function () {
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
                 //console.log(partObstacles[i].type);
+
                 if(this.eaten.length < 2){
                 	this.score += 5;
                 	console.log(this.score);
@@ -837,6 +850,13 @@ $(document).ready(function () {
                 }
                 partObstacles.splice(i,1);
                 createObstacles(1, false);
+                if(this.closed == true){
+                  this.setSrc(sources.WeaselOpened);
+                  this.closed = false;
+                }else{
+                  this.setSrc(sources.WeaselClosed);
+                  this.closed = true;
+                }
             }
         }
 
