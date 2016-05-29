@@ -116,6 +116,78 @@ $(document).ready(function () {
         }
     })
 
+    var hasGP = false;
+    var repGP;
+    var bnag = false;
+ 
+    function canGame() {
+        return "getGamepads" in navigator;
+    }
+
+    function reportOnGamepad() {
+        var gp = navigator.getGamepads()[0];
+        var html = "";
+            html += "id: "+gp.id+"<br/>";
+ 
+        for(var i=0;i<gp.buttons.length;i++) {
+            html+= "Button "+(i+1)+": ";
+            if(gp.buttons[i].pressed) html+= " pressed";
+            html+= "<br/>";
+        }
+ 
+        for(var i=0;i<gp.axes.length; i+=2) {
+            html+= "Stick "+(Math.ceil(i/2)+1)+": "+gp.axes[i]+","+gp.axes[i+1]+"<br/>";
+        }
+ 
+        $("#gamepadDisplay").html(html);
+    }
+
+    if(canGame()) {
+        var prompt = "To begin using your gamepad, connect it and press any button!";
+        $("#gamepadPrompt").text(prompt);
+
+        $(window).on("gamepadconnected", function() {
+            hasGP = true;
+            $("#gamepadPrompt").html("Gamepad connected!");
+            console.log("connection event");
+            repGP = window.setInterval(reportOnGamepad,100);
+        });
+
+        $(window).on("gamepaddisconnected", function() {
+            console.log("disconnection event");
+            $("#gamepadPrompt").text(prompt);
+            windo.clearInterval(repGP);
+        });
+
+        //setup an interval for Chrome
+        var checkGP = window.setInterval(function() {
+            console.log(checkGP);
+            if(navigator.getGamepads()[0]) {
+                if(!hasGP) $(window).trigger("gamepadconnected");
+                window.clearInterval(checkGP);
+            }
+        }, 500);
+    }
+
+    function checkGamepad() {
+        var gp = navigator.getGamepads()[0];
+        var axeLF = gp.axes[0];
+        var axeRF = gp.axes[1];
+        var q1 = axeLF > 0 && axeRF > 0;
+        var q2 = axeLF < 0 && axeRF > 0;
+        var q3 = axeLF < 0 && axeRF < 0;
+        var q4 = axeLF > 0 && axeRF < 0;
+
+        if (Math.abs(axeLF) > .5 || Math.abs(axeRF) > .5) {
+            weasel.angle = Math.atan2(axeRF,axeLF);
+            console.log(weasel.angle*180/Math.PI);
+            weasel.speed = 10;
+        } else {
+            weasel.speed = 0;
+        }
+        
+    }
+
     //Call with global event variable
     function getMousePos(canvas, evt) {
         var rect = canvas.getBoundingClientRect();
@@ -843,13 +915,10 @@ $(document).ready(function () {
             }
         }
 
-        if (mouseDowned && this.stopped == true) {
+        /*if (!bnag && this.stopped == true) {
             this.stopped = false;
             this.speed = .5;
-        } else {
-
-        }
-
+        }*/
         this.move();
     }
 
@@ -862,25 +931,25 @@ $(document).ready(function () {
         if (this.speed > 10) this.speed = 10;
 
         //Set Min Speed
-        if (this.speed < 2) this.speed = 2;
+        //if (this.speed < 2) this.speed = 2;
 
         this.center();
-        if (checkBounds(this, mousePos.x, mousePos.y)) {
+        /*if (checkBounds(this, mousePos.x, mousePos.y)) {
             //console.log("stopping");
             this.stopped = true;
             this.speed = 0;
-        }
+        }*/
         this.uncenter();
-        this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
+        //this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
 
-        this.speed = this.speed * this.accel;
+        //this.speed = this.speed * this.accel;
 
-        this.x += Math.cos(this.angle * Math.PI/180) * this.speed;
-        this.y += Math.sin(this.angle * Math.PI/180) * this.speed;
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
     }
 
     weasel.draw = function() {
-        this.angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
+        //this.angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
         ctx.translate(-this.x, -this.y);
@@ -962,6 +1031,7 @@ $(document).ready(function () {
 //-----------------------------------------------------------------------
 
     function handleInput() {
+        checkGamepad();
         if (mouseDowned) {
             mousePos = getMousePos(canvas, event);
         }
