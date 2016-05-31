@@ -42,7 +42,7 @@ $(document).ready(function () {
         powerParticles.push(initialParticles[p]);
         initialParticles.splice(p, 1);
     }
-  
+
     //----------------------Images----------------------------------
     //-----------------------------------------------------------------------
     //Source image array
@@ -52,7 +52,8 @@ $(document).ready(function () {
         StartScreen: "./images/StartScreen.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
-        Weasel: "./images/WeaselOpen.png",
+        WeaselOpened: "./images/WeaselOpen.png",
+        WeaselClosed: "./images/WeaselClosed.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
         Powerup1: powerParticles[0],
@@ -121,7 +122,7 @@ $(document).ready(function () {
             y: evt.clientY - rect.top
         };
     }
- 
+
     //----------------------Gamepad Functions--------------------------------
     //-----------------------------------------------------------------------
     //Mostly taken from:
@@ -141,7 +142,7 @@ $(document).ready(function () {
         gp = navigator.getGamepads()[0];
         var html = "";
             html += "id: "+gp.id+"<br/>";
- 
+
         //$("#gamepadDisplay").html(html);
     }
 
@@ -332,7 +333,7 @@ $(document).ready(function () {
     var menu = new Screen(false,false);
     screenMan.push(menu);
     menu.init = function() {
-        
+
         //Menu background w/ controls
         control = new Sprite();
         control.setSrc(sources.StartScreen);
@@ -478,7 +479,7 @@ $(document).ready(function () {
         /*ctx.fillRect(0, h - 50, w, h);
         for(i in weasel.eaten){
           weasel.eaten[i].draw();
-        
+
         }
         */
 
@@ -628,7 +629,7 @@ $(document).ready(function () {
             //past upper part and moving up
             else if(this.y < 0 && this.yspeed < 0){
                 //this.x = Math.random() * canvas.width();
-                this.period = Math.random() * 90;               
+                this.period = Math.random() * 90;
                 this.yspeed *= -1;
             }
             //x equivalents
@@ -645,7 +646,7 @@ $(document).ready(function () {
             else{
                 this.x += this.xspeed;
                 this.y += this.yspeed;
-                
+
             }
         }
     }
@@ -879,7 +880,7 @@ $(document).ready(function () {
 //----------------------------------------------------------------------------
     var weasel = new Sprite();
     weasel.image = new Image();
-    weasel.setSrc(sources.Weasel);
+    weasel.setSrc(sources.WeaselClosed);
     weasel.x = canvas.width/2;
     weasel.y = canvas.height/2;
     weasel.center();
@@ -893,6 +894,7 @@ $(document).ready(function () {
     weasel.speedPower = false;
     weasel.angle = 0;
     weasel.score = 5000;
+    weasel.closed = true;
 
     weasel.init = function() {
         this.followPower = false;
@@ -941,6 +943,13 @@ $(document).ready(function () {
                 }
                 partObstacles.splice(i,1);
                 createObstacles(1, false);
+                if(this.closed == true){
+                  this.setSrc(sources.WeaselOpened);
+                  this.closed = false;
+                }else{
+                  this.setSrc(sources.WeaselClosed);
+                  this.closed = true;
+                }
             }
         }
 
@@ -951,7 +960,7 @@ $(document).ready(function () {
                 this.speed = .5;
             }
         }
-        
+
         if (!useCon) this.mouseMove();
         if(hasGP) {
             this.conMove();
