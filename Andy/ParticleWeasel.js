@@ -47,13 +47,14 @@ $(document).ready(function () {
     //-----------------------------------------------------------------------
     //Source image array
     var sources = {
-        NewGame: "./images/NewGame.png",
+        NewGame: "./images/win.png",
         StartGame: "./images/StartGame.png",
         StartScreen: "./images/StartScreen.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
         WeaselOpened: "./images/WeaselOpen.png",
         WeaselClosed: "./images/WeaselClosed.png",
+		WinImage:	"./images/win.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
         Powerup1: powerParticles[0],
