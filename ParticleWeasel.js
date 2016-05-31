@@ -2,13 +2,11 @@
  * Created by Andy on 5/8/2016.
  */
 $(document).ready(function () {
-
-
-        var aMaxX = 9;
-        var aMaxY = 0 ;
-        var bMaxX = 0;
-        var bMaxY = 0;
-
+    //Variables for overlap()
+    var aMaxX = 0;
+    var aMaxY = 0;
+    var bMaxX = 0;
+    var bMaxY = 0;
 
     //Canvas
     var canvas = $("#canvas")[0];
@@ -16,42 +14,42 @@ $(document).ready(function () {
     var w = $("#canvas").width();
     var h = $("#canvas").height();
 
-     //Audio variables
-    var aud = new Audio();
+    //Audio variables
+    var aud = new Audio("theme.mp3");
+    aud.volume = 0.1;
+    var audPower = new Audio("Powerup12.wav");
+    audPower.volume = 0.2;
     var pauseMusic = false;
-    var highscore = 0;
 
+    //----------------------Randomly selecting power up Partcles----------------------------------
+    //-----------------------------------------------------------------------
 
-//----------------------Randomly selecting power up Partcles----------------------------------
-//-----------------------------------------------------------------------
+    var initialParticles = new Array();
+    var powerParticles = new Array();
+    initialParticles.push("./images/Particle1.png");
+    initialParticles.push("./images/Particle3.png");
+    initialParticles.push("./images/Particle4.png");
+    initialParticles.push("./images/Particle2.png");
+    initialParticles.push("./images/Particle7.png");
+    initialParticles.push("./images/Particle8.png");
+    initialParticles.push("./images/Particle9.png");
+    initialParticles.push("./images/Particle10.png");
+    initialParticles.push("./images/Particle12.png");
+    initialParticles.push("./images/Particle13.png");
 
-  var initialParticles = new Array();
-  var powerParticles = new Array();
-  initialParticles.push("./images/Particle1.png");
-  initialParticles.push("./images/Particle3.png");
-  initialParticles.push("./images/Particle4.png");
-  initialParticles.push("./images/Particle2.png");
-  initialParticles.push("./images/Particle7.png");
-  initialParticles.push("./images/Particle8.png");
-  initialParticles.push("./images/Particle9.png");
-  initialParticles.push("./images/Particle10.png");
-  initialParticles.push("./images/Particle12.png");
-  initialParticles.push("./images/Particle13.png");
-
-
-  for(var i = 0; i < 3; i++){
-    p = Math.round(Math.random()*(initialParticles.length-1));
-    powerParticles.push(initialParticles[p]);
-    initialParticles.splice(p, 1);
-  }
+    for(var i = 0; i < 3; i++){
+        p = Math.round(Math.random()*(initialParticles.length-1));
+        powerParticles.push(initialParticles[p]);
+        initialParticles.splice(p, 1);
+    }
   
-//----------------------Images----------------------------------
-//-----------------------------------------------------------------------
+    //----------------------Images----------------------------------
+    //-----------------------------------------------------------------------
     //Source image array
-    //@todo: add obstacle and proton images
     var sources = {
         NewGame: "./images/NewGame.png",
-        Controls: "./images/Controls.png",
+        StartGame: "./images/StartGame.png",
+        StartScreen: "./images/StartScreen.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
         Weasel: "./images/WeaselOpen.png",
@@ -64,8 +62,9 @@ $(document).ready(function () {
         array: []
     }
 
+    //Push initial particles for use in sources.array
     for(var i = 0; i < initialParticles.length; i++){
-      sources.array.push(initialParticles[i]);
+        sources.array.push(initialParticles[i]);
     }
 
     //----------------------Mouse/Keyboard Functions----------------------------------
@@ -122,6 +121,58 @@ $(document).ready(function () {
             y: evt.clientY - rect.top
         };
     }
+ 
+    //----------------------Gamepad Functions--------------------------------
+    //-----------------------------------------------------------------------
+    //Mostly taken from:
+    //http://gamedevelopment.tutsplus.com/tutorials/using-the-html5-gamepad-api-to-add-controller-support-to-browser-games--cms-21345
+
+    //Gamepad Variables
+    var useCon = false;
+    var gp;
+    var hasGP = false;
+    var repGP;
+
+    function canGame() {
+        return "getGamepads" in navigator;
+    }
+
+    function reportOnGamepad() {
+        gp = navigator.getGamepads()[0];
+        var html = "";
+            html += "id: "+gp.id+"<br/>";
+ 
+        //$("#gamepadDisplay").html(html);
+    }
+
+    if(canGame()) {
+        var prompt = "To begin using your gamepad, connect it and press any button!";
+        $("#gamepadPrompt").text(prompt);
+
+        $(window).on("gamepadconnected", function() {
+            hasGP = true;
+            $("#gamepadPrompt").html("Gamepad connected!");
+            console.log("connection event");
+            repGP = window.setInterval(reportOnGamepad,1);
+        });
+
+        $(window).on("gamepaddisconnected", function() {
+            hasGP = false;
+            console.log("disconnection event");
+            $("#gamepadPrompt").text(prompt);
+            window.clearInterval(repGP);
+        });
+
+        //setup an interval for Chrome
+        var checkGP = window.setInterval(function() {
+            console.log(checkGP);
+            if(navigator.getGamepads()[0]) {
+                if(!hasGP) $(window).trigger("gamepadconnected");
+                window.clearInterval(checkGP);
+            }
+        }, 500);
+    }
+
 
 //----------------------Game State-----------------------------------
 //-----------------------------------------------------------------------
@@ -144,7 +195,6 @@ $(document).ready(function () {
     this.name = "Unnamed";
     this.children = [];
     }
-
 
     Sprite.prototype.setSrc = function(src) {
         this.image.src = src;
@@ -208,6 +258,7 @@ $(document).ready(function () {
     Screen.prototype.init = function(){
     }
 
+    //Needed because inheriting from sprite apparently doesn't work right in Firefox
     Screen.prototype.draw = function() {
         this.drawChildren();
     }
@@ -281,38 +332,45 @@ $(document).ready(function () {
     var menu = new Screen(false,false);
     screenMan.push(menu);
     menu.init = function() {
+        
+        //Menu background w/ controls
+        control = new Sprite();
+        control.setSrc(sources.StartScreen);
+        control.width = w;
+        control.height = h;
+        control.x = 0;
+        control.y = 0;
+        this.addChild(control);
+
         //console.log("initializing");
         var newGame = new Sprite();
         newGame.name = "New Game"
         newGame.image = new Image();
         //console.log(sources.NewGame);
-        newGame.image.src = sources.NewGame;
+        newGame.image.src = sources.StartGame;
         newGame.width = 224;
         newGame.height = 34;
         newGame.x = canvas.width/2;
         newGame.y = canvas.height/2 - 54;
         newGame.center();
         this.addChild(newGame);
-
-        control = new Sprite();
-        control.setSrc(sources.Controls);
-        control.width = 465;
-        control.height = 104;
-        control.x = 10;
-        control.y = canvas.height/2 + 50;
-        this.addChild(control);
-
     }
     menu.update = function() {
-        if(clicked(this.children[0])) {
+        if(clicked(this.children[1])) {
             screenMan.push(tutScreen);
+        }
+        if(hasGP) {
+            if(gp.buttons[0].pressed){
+                useCon = true;
+                screenMan.push(tutScreen);
+            }
         }
     }
     menu.draw = function() {
-        ctx.fillText("Highscore: "+highscore, canvas.width/2,10);
         this.drawChildren();
     }
 
+    //----Introduction Level-----------------\\
     var tutScreen = new Screen(true,true);
     tutScreen.init = function() {
         console.log("initializing");
@@ -351,7 +409,13 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].draw();
         }
+        ctx.save();
+        ctx.fillStyle = "red";
+        ctx.font = "48px Serif";
+        ctx.fillText("The Protons Love Each Other", w/2, 50);
+        ctx.restore();
     }
+
     //----Game Screen-----------------\\
     var gameScreen = new Screen(true, true);
 
@@ -409,11 +473,14 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].draw();
         }
-        ctx.fillRect(0, h - 50, w, h);
+
+        //Display visual of eaten particle array
+        /*ctx.fillRect(0, h - 50, w, h);
         for(i in weasel.eaten){
           weasel.eaten[i].draw();
-
+        
         }
+        */
 
     }
 
@@ -450,6 +517,17 @@ $(document).ready(function () {
         if (clicked(this.children[1])) {
             screenMan.pop(this);
         }
+        if(hasGP) {
+            if(gp.buttons[1].pressed){
+                useCon = true;
+                screenMan.remove(tutScreen);
+                screenMan.push(gameScreen);
+                screenMan.push(menu);
+            } else if(gp.buttons[0].pressed) {
+                useCon = true;
+                screenMan.pop(this);
+            }
+        }
 
     }
 
@@ -470,6 +548,13 @@ $(document).ready(function () {
         if(clicked(this.children[0])) {
             screenMan.remove(tutScreen);
             screenMan.push(gameScreen);
+        }
+        if(hasGP) {
+            if(gp.buttons[0].pressed){
+                useCon = true;
+                screenMan.remove(tutScreen);
+                screenMan.push(gameScreen);
+            }
         }
     }
 
@@ -605,8 +690,8 @@ $(document).ready(function () {
             //console.log("x = " + Coord.x);
             //console.log("y = " + Coord.y);
             this.angle = Math.atan2(diffY, diffX)*180 / Math.PI;
-            this.x += Math.cos(this.angle * Math.PI/180) * -this.speed;
-            this.y += Math.sin(this.angle * Math.PI/180) * -this.speed;
+            this.x += Math.cos(this.angle * Math.PI/180) * -this.speed*2;
+            this.y += Math.sin(this.angle * Math.PI/180) * -this.speed*2;
         }
 
     Particle.prototype.move = function () {
@@ -652,7 +737,7 @@ $(document).ready(function () {
         this.y = y;
         this.width = radius*2;
         this.height = radius*2;
-        this.speed = 5;
+        this.speed = 10;
         this.side = side;
         this.radius = radius;
         this.target = target
@@ -665,10 +750,10 @@ $(document).ready(function () {
 
     Proton.prototype.init = function() {
         if (this.side == "left") {
-            this.x = -15;
+            this.x = 0;
             this.y = h/4;
         } else {
-            this.x = w;
+            this.x = w-50;
             this.y = 3*(h/4);
             this.angle = 180;
         }
@@ -679,8 +764,10 @@ $(document).ready(function () {
           //console.log(distance(this,weasel));
           //console.log(distance(partObstacles[this.target], weasel));
             if(distance(this, weasel) < 500 && distance(protonArray[this.target], this) > 150){
+                this.speed = Math.abs(this.speed);
                 this.moveTowards(weasel);
             } else if(distance(protonArray[this.target], this) < 150){
+                this.speed = Math.abs(this.speed);
                 this.moveTowards(protonArray[this.target]);
             }else{
                 this.move(this.angle);
@@ -691,14 +778,20 @@ $(document).ready(function () {
             this.move();
         }
         if(weasel.forcePush) {
-          for(i in partObstacles){
-              if(distance(weasel, partObstacles[i]) < 200) {
-                  partObstacles[i].running = true;
-              }
+            for(i in partObstacles){
+                if(distance(weasel, partObstacles[i]) < 200) {
+                    partObstacles[i].running = true;
+                }
             }
-          }
+        }
+
+        if(weasel.speedPower) {
+            this.speed = 20;
+        } else this.speed = 10;
+
         if(this.overlap(this, protonArray[this.target])){
-            makeExplosion(40);
+            makeExplosion((weasel.score/100) + 40);
+            audPower.play();
             protonArray = [];
             protonCount = 1;
             weasel.init();
@@ -711,8 +804,8 @@ $(document).ready(function () {
                 this.angle += Math.random()*720;
             }
         }
-        if(this.x < -50 || this.x > w+50 || this.y < -50 || this.y > h+50) {
-            this.angle += 180;
+        if(this.x <= 0 || this.x+this.width >= w || this.y <= 0 || this.y+this.height >= h) {
+            this.speed *= -1;
         }
     }
 
@@ -732,10 +825,10 @@ $(document).ready(function () {
     //Called in game screen init
     function createProtons(side){
         if(side == "left"){
-            protonArray.push(new Proton(-30, h/2 ,2, "left", 25, protonCount));
+            protonArray.push(new Proton(0, h/2 ,2, "left", 25, protonCount));
         }
         if(side == "right"){
-            protonArray.push(new Proton(w-5, h/2 ,2, "right", 25, protonCount));
+            protonArray.push(new Proton(w-60, h/2 ,2, "right", 25, protonCount));
         }
         protonCount--;
     }
@@ -744,7 +837,7 @@ $(document).ready(function () {
 //----------------------Particle System for Win Condition--------------
 //--------------------------------------------------------------------------
     var explosion = [];
-    function explosionParticle(x, y, radius, vSpeed, hSpeed){
+    function explosionParticle(x, y, radius, vSpeed, hSpeed, speed){
         Sprite.call(this);
         this.x = x;
         this.y = y;
@@ -754,13 +847,14 @@ $(document).ready(function () {
         this.vSpeed = vSpeed;
         this.hSpeed = hSpeed;
         this.image.src = sources.array[Math.floor(Math.random()  * 7)];
+        this.speed = Math.random()*17 + 10;
     }
 
     explosionParticle.prototype = new Particle();
 
     explosionParticle.prototype.update = function(){
-      this.x += this.hSpeed;
-      this.y += this.vSpeed;
+      this.x += this.hSpeed*this.speed;
+      this.y += this.vSpeed*this.speed;
     }
 
     function makeExplosion(numParticles){
@@ -776,6 +870,7 @@ $(document).ready(function () {
 
     var followPowerTime;
     var pushPowerTime;
+    var speedPowerTime;
 
 
 //----------------------Weasel Implementation---------------------------------
@@ -793,11 +888,15 @@ $(document).ready(function () {
     weasel.numEaten = 0;
     weasel.followPower = false;
     weasel.forcePush = false;
+    weasel.speedPower = false;
     weasel.angle = 0;
+    weasel.score = 5000;
 
     weasel.init = function() {
         this.followPower = false;
         this.forcePush = false;
+        this.speedPower = false;
+        this.score = 0;
     }
 
     weasel.update = function() {
@@ -807,13 +906,23 @@ $(document).ready(function () {
 
             if(particle0 == "Powerup1" || particle1 == "Powerup1"){
                 this.followPower = true;
+                this.score += 100;
                 followPowerTime = setTimeout(function() {setFollowFalse();}
                                   ,5000); //5sec
             }
 
-             if(particle0 == "Powerup3" || particle1 == "Powerup3"){
+            if(particle0 == "Powerup3" || particle1 == "Powerup3"){
                 this.forcePush = true;
+                this.score += 100;
                 pushPowerTime = setTimeout(function() {setPushFalse();}
+                                ,5000);
+            }
+
+            if(particle0 == "Powerup2" || particle1 == "Powerup2"){
+                this.speedPower = true;
+                //this.speed = this.speed*2;
+                this.score += 100;
+                speedPowerTime = setTimeout(function() {setSpeedFalse();}
                                 ,5000);
             }
         }else this.init;
@@ -821,8 +930,10 @@ $(document).ready(function () {
             if(overlap(this, partObstacles[i])){
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
+                    this.score += 5;
                     this.eaten.push(partObstacles[i]);
                 } else if(this.eaten.length = 2){
+                    this.score += 5;
                     this.eaten.pop();
                     this.eaten.unshift(partObstacles[i]);
                 }
@@ -831,23 +942,27 @@ $(document).ready(function () {
             }
         }
 
-        if (mouseDowned && this.stopped == true) {
-            this.stopped = false;
-            this.speed = .5;
-        } else {
-
+        if (mouseDowned) {
+            useCon = false;
+            if (this.stopped) {
+                this.stopped = false;
+                this.speed = .5;
+            }
         }
-
-        this.move();
+        
+        if (!useCon) this.mouseMove();
+        if(hasGP) {
+            this.conMove();
+        }
     }
 
-    weasel.move = function() {
+    weasel.mouseMove = function() {
         this.accel = 1.25;
         diffX = mousePos.x - this.x;
         diffY = mousePos.y - this.y;
 
         //Set Max Speed
-        if (this.speed > 10) this.speed = 10;
+        if (this.speed>10) this.speed = 10;
 
         //Set Min Speed
         if (this.speed < 2) this.speed = 2;
@@ -867,8 +982,33 @@ $(document).ready(function () {
         this.y += Math.sin(this.angle * Math.PI/180) * this.speed;
     }
 
+    weasel.conMove = function() {
+        var gp = navigator.getGamepads()[0];
+        var axeLF = gp.axes[0];
+        var axeRF = gp.axes[1];
+        var q1 = axeLF > 0 && axeRF > 0;
+        var q2 = axeLF < 0 && axeRF > 0;
+        var q3 = axeLF < 0 && axeRF < 0;
+        var q4 = axeLF > 0 && axeRF < 0;
+
+        if (Math.abs(axeLF) > .5 || Math.abs(axeRF) > .5) useCon = true;
+
+        if (useCon) {
+            if (Math.abs(axeLF) > .5 || Math.abs(axeRF) > .5) {
+                useCon = true;
+                this.angle = Math.atan2(axeRF,axeLF);
+                console.log(weasel.angle*180/Math.PI);
+                this.speed = 10 + Math.abs(axeLF*10);
+            } else {
+                this.speed = 0;
+            }
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+        }
+    }
+
     weasel.draw = function() {
-        this.angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
+        if(!useCon) this.angle = Math.atan2(mousePos.y - this.y, mousePos.x - this.x);
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
         ctx.translate(-this.x, -this.y);
@@ -892,6 +1032,12 @@ $(document).ready(function () {
         weasel.eaten.length = 0;
         weasel.forcePush = false;
         clearTimeout(pushPowerTime);
+    }
+
+    function setSpeedFalse() {
+        console.log("Setting False");
+        weasel.speedPower = false;
+        clearTimeout(speedPowerTime);
     }
 //----------------------Display for collected particles----------------------
 //----------------------------------------------------------------------
@@ -967,6 +1113,12 @@ $(document).ready(function () {
             }
             if (key == 27) screenMan.push(pauseScreen);
         }
+        if(hasGP) {
+            if(gp.buttons[3].pressed){
+                useCon = true;
+                screenMan.push(pauseScreen);
+            }
+        }
     }
 
     function draw() {
@@ -980,8 +1132,8 @@ $(document).ready(function () {
         //ctx.fillText("bMaxX: " + bMaxX, 5, 30);
         //ctx.fillText("bMaxY: " + bMaxY, 5, 40);
         //ctx.fillText("pauseMusic " + pauseMusic, 5, 50);
-        ctx.fillText("Follow Power:" + weasel.followPower, 5, 10);
-        ctx.fillText("Push Power:" + weasel.forcePush, 5, 20);
+        ctx.fillText("Speed Power:" + weasel.speedPower, 5, 10);
+        //ctx.fillText("Push Power:" + weasel.forcePush, 5, 20);
         //ctx.fillText("Proton speed:" + protonArray[0].speed + " " + protonArray[1].speed, 5, 30);
     }
 
