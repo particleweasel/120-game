@@ -753,7 +753,7 @@ $(document).ready(function () {
             this.x = 0;
             this.y = h/4;
         } else {
-            this.x = w-50;
+            this.x = w-100;
             this.y = 3*(h/4);
             this.angle = 180;
         }
@@ -805,7 +805,7 @@ $(document).ready(function () {
             }
         }
         if(this.x <= 0 || this.x+this.width >= w || this.y <= 0 || this.y+this.height >= h) {
-            this.speed *= -1;
+            this.angle -= 90;
         }
     }
 
@@ -828,7 +828,9 @@ $(document).ready(function () {
             protonArray.push(new Proton(0, h/2 ,2, "left", 25, protonCount));
         }
         if(side == "right"){
-            protonArray.push(new Proton(w-60, h/2 ,2, "right", 25, protonCount));
+            var right = new Proton(w-50, h/2 ,2, "right", 25, protonCount);
+            right.angle = 180;
+            protonArray.push(right);
         }
         protonCount--;
     }
