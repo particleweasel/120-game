@@ -475,6 +475,11 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].draw();
         }
+        ctx.save();
+        ctx.fillStyle = "red";
+        ctx.font = "48px Serif";
+        ctx.fillText(weasel.score, w/2, 50);
+        ctx.restore();
 
         //Display visual of eaten particle array
         /*ctx.fillRect(0, h - 50, w, h);
@@ -544,11 +549,13 @@ $(document).ready(function () {
         nextLevel.y = canvas.height/2;
         nextLevel.center();
         this.addChild(nextLevel);
+        
     }
 
     scoreScreen.update = function() {
         if(clicked(this.children[0])) {
             screenMan.remove(tutScreen);
+            weasel.init();
             screenMan.push(gameScreen);
         }
         if(hasGP) {
@@ -805,7 +812,7 @@ $(document).ready(function () {
             audPower.play();
             protonArray = [];
             protonCount = 1;
-            weasel.init();
+            //weasel.init();
             gameScreen.children.pop();
             tutScreen.children.pop();
             screenMan.push(scoreScreen);
@@ -905,6 +912,7 @@ $(document).ready(function () {
     weasel.speedPower = false;
     weasel.angle = 0;
     weasel.score = 5000;
+    weasel.scoreText = weasel.score.toString();
     weasel.closed = true;
 
     weasel.init = function() {
@@ -915,6 +923,9 @@ $(document).ready(function () {
     }
 
     weasel.update = function() {
+    	ctx.font = "100px Arial";
+    	ctx.fillStyle = "red";
+    	ctx.fillText(this.scoreText, 50, 50);
         if(this.eaten.length == 2){
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
