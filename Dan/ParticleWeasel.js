@@ -1,5 +1,5 @@
 /**
- * Created by Andy on 5/8/2016.
+ * Team Particle Weasel 6/1/16 1:25PM
  */
 $(document).ready(function () {
     //Variables for overlap()
@@ -42,17 +42,19 @@ $(document).ready(function () {
         powerParticles.push(initialParticles[p]);
         initialParticles.splice(p, 1);
     }
-  
+
     //----------------------Images----------------------------------
     //-----------------------------------------------------------------------
     //Source image array
     var sources = {
-        NewGame: "./images/NewGame.png",
+        NewGame: "./images/win.png",
         StartGame: "./images/StartGame.png",
         StartScreen: "./images/StartScreen.png",
         MainMenu: "./images/MainMenu.png",
         ResumeGame: "./images/ResumeGame.png",
-        Weasel: "./images/WeaselOpen.png",
+        WeaselOpened: "./images/WeaselOpen.png",
+        WeaselClosed: "./images/WeaselClosed.png",
+		WinImage:	"./images/Win.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
         Powerup1: powerParticles[0],
@@ -121,7 +123,7 @@ $(document).ready(function () {
             y: evt.clientY - rect.top
         };
     }
- 
+
     //----------------------Gamepad Functions--------------------------------
     //-----------------------------------------------------------------------
     //Mostly taken from:
@@ -141,7 +143,7 @@ $(document).ready(function () {
         gp = navigator.getGamepads()[0];
         var html = "";
             html += "id: "+gp.id+"<br/>";
- 
+
         //$("#gamepadDisplay").html(html);
     }
 
@@ -332,7 +334,7 @@ $(document).ready(function () {
     var menu = new Screen(false,false);
     screenMan.push(menu);
     menu.init = function() {
-        
+
         //Menu background w/ controls
         control = new Sprite();
         control.setSrc(sources.StartScreen);
@@ -478,7 +480,7 @@ $(document).ready(function () {
         /*ctx.fillRect(0, h - 50, w, h);
         for(i in weasel.eaten){
           weasel.eaten[i].draw();
-        
+
         }
         */
 
@@ -535,7 +537,7 @@ $(document).ready(function () {
     var scoreScreen = new Screen(false, false);
     scoreScreen.init = function() {
         var nextLevel = new Sprite();
-        nextLevel.setSrc(sources.NewGame);
+        nextLevel.setSrc(sources.WinImage);
         nextLevel.width = 224;
         nextLevel.height = 34;
         nextLevel.x = canvas.width/2;
@@ -578,6 +580,7 @@ $(document).ready(function () {
         this.yspeed = speed * Math.sin(period);
         this.style = Math.floor(Math.random()*2);
         this.angle = 0;
+		this.saveSpeed = speed;
 
         if(this.type == "obstacle") {
             this.type = Math.floor(Math.random()  * 7);
@@ -612,14 +615,19 @@ $(document).ready(function () {
                     this,period = 10;
                 }
             } else {
-                this.x = h;
-                this.y = Math.random() * w;
-                this.period = 10;
+                for(i in partObstacles) {
+                    if (partObstacles[i] == this) {
+                        partObstacles.splice(i,1);
+                        createObstacles(1,false);
+                    }
+                }
             }
         }
 
         this.drift = function() {
             //past lower part and moving down
+			//this.xspeed = speed * Math.cos(period);
+			//this.yspeed = speed * Math.sin(period);
             if(this.y > canvas.height && this.yspeed > 0){
                 //this.x = Math.random() * canvas.width();
                 this.period = Math.random() * 90;
@@ -628,7 +636,7 @@ $(document).ready(function () {
             //past upper part and moving up
             else if(this.y < 0 && this.yspeed < 0){
                 //this.x = Math.random() * canvas.width();
-                this.period = Math.random() * 90;               
+                this.period = Math.random() * 90;
                 this.yspeed *= -1;
             }
             //x equivalents
@@ -645,7 +653,7 @@ $(document).ready(function () {
             else{
                 this.x += this.xspeed;
                 this.y += this.yspeed;
-                
+
             }
         }
     }
@@ -656,11 +664,14 @@ $(document).ready(function () {
         //console.log(this.running);
         if(!weasel.forcePush) this.running = false;
         if(this.running) {
+			this.speed = 10;
             this.moveAway(weasel);
         } else {
             if(this.style == 0) {
+				this.speed = this.saveSpeed;
                 this.drift();
             } else {
+				this.speed = this.saveSpeed;
                 this.float();
             }
         }
@@ -699,7 +710,7 @@ $(document).ready(function () {
         this.y += Math.sin(this.angle * Math.PI/180) * this.speed;
     }
 
-    //Called in game screen init.
+    //If called in game screen init, reset = true.
     function createObstacles(numObstacles, reset) {
         var type;
         if(reset)partObstacles = [];
@@ -763,10 +774,10 @@ $(document).ready(function () {
         if(weasel.followPower == true){
           //console.log(distance(this,weasel));
           //console.log(distance(partObstacles[this.target], weasel));
-            if(distance(this, weasel) < 500 && distance(protonArray[this.target], this) > 150){
+            if(distance(this, weasel) < 350 && distance(protonArray[this.target], this) > 100){
                 this.speed = Math.abs(this.speed);
                 this.moveTowards(weasel);
-            } else if(distance(protonArray[this.target], this) < 150){
+            } else if(distance(protonArray[this.target], this) < 100){
                 this.speed = Math.abs(this.speed);
                 this.moveTowards(protonArray[this.target]);
             }else{
@@ -779,18 +790,18 @@ $(document).ready(function () {
         }
         if(weasel.forcePush) {
             for(i in partObstacles){
-                if(distance(weasel, partObstacles[i]) < 200) {
+                if(distance(weasel, partObstacles[i]) < 100) {
                     partObstacles[i].running = true;
                 }
             }
         }
 
-        if(weasel.speedPower) {
-            this.speed = 20;
-        } else this.speed = 10;
+        //if(weasel.speedPower) {
+        //    this.speed = 20;
+        //} else this.speed = 10;
 
         if(this.overlap(this, protonArray[this.target])){
-            makeExplosion((weasel.score/100) + 40);
+            makeExplosion((weasel.score/100));
             audPower.play();
             protonArray = [];
             protonCount = 1;
@@ -806,6 +817,7 @@ $(document).ready(function () {
         }
         if(this.x <= 0 || this.x+this.width >= w || this.y <= 0 || this.y+this.height >= h) {
             this.angle -= 90;
+
         }
     }
 
@@ -879,7 +891,7 @@ $(document).ready(function () {
 //----------------------------------------------------------------------------
     var weasel = new Sprite();
     weasel.image = new Image();
-    weasel.setSrc(sources.Weasel);
+    weasel.setSrc(sources.WeaselClosed);
     weasel.x = canvas.width/2;
     weasel.y = canvas.height/2;
     weasel.center();
@@ -893,9 +905,10 @@ $(document).ready(function () {
     weasel.speedPower = false;
     weasel.angle = 0;
     weasel.score = 5000;
+    weasel.closed = true;
 
     weasel.init = function() {
-        this.followPower = false;
+        
         this.forcePush = false;
         this.speedPower = false;
         this.score = 0;
@@ -910,26 +923,33 @@ $(document).ready(function () {
                 this.followPower = true;
                 this.score += 100;
                 followPowerTime = setTimeout(function() {setFollowFalse();}
-                                  ,5000); //5sec
+                                  ,5000); //3sec
             }
 
             if(particle0 == "Powerup3" || particle1 == "Powerup3"){
                 this.forcePush = true;
                 this.score += 100;
                 pushPowerTime = setTimeout(function() {setPushFalse();}
-                                ,5000);
+                                ,1500);
             }
 
             if(particle0 == "Powerup2" || particle1 == "Powerup2"){
                 this.speedPower = true;
                 //this.speed = this.speed*2;
-                this.score += 100;
+                this.score += 500;
                 speedPowerTime = setTimeout(function() {setSpeedFalse();}
                                 ,5000);
             }
-        }else this.init;
+		}
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
+                if(this.closed == true){
+                  this.image.src = sources.WeaselOpened;
+                  this.closed = false;
+                }else{
+                  this.image.src = sources.WeaselClosed;
+                  this.closed = true;
+                }
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
                     this.score += 5;
@@ -951,7 +971,7 @@ $(document).ready(function () {
                 this.speed = .5;
             }
         }
-        
+
         if (!useCon) this.mouseMove();
         if(hasGP) {
             this.conMove();
@@ -1017,7 +1037,15 @@ $(document).ready(function () {
         this.center();
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.setTransform(1,0,0,1,0,0);
+
         this.uncenter();
+        if(this.forcePush){
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 100, 0, 2*Math.PI, false);
+            ctx.fillStyle = "rgba(0, 0, 255, .5)";
+            ctx.fill();
+
+        }
         this.drawChildren();
 
     }
@@ -1134,7 +1162,7 @@ $(document).ready(function () {
         //ctx.fillText("bMaxX: " + bMaxX, 5, 30);
         //ctx.fillText("bMaxY: " + bMaxY, 5, 40);
         //ctx.fillText("pauseMusic " + pauseMusic, 5, 50);
-        ctx.fillText("Speed Power:" + weasel.speedPower, 5, 10);
+        //ctx.fillText("Speed Power:" + weasel.speedPower, 5, 10);
         //ctx.fillText("Push Power:" + weasel.forcePush, 5, 20);
         //ctx.fillText("Proton speed:" + protonArray[0].speed + " " + protonArray[1].speed, 5, 30);
     }
