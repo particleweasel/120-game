@@ -786,9 +786,9 @@ $(document).ready(function () {
             }
         }
 
-        if(weasel.speedPower) {
+        /*if(weasel.speedPower) {
             this.speed = 20;
-        } else this.speed = 10;
+        } else this.speed = 10;*/
 
         if(this.overlap(this, protonArray[this.target])){
             makeExplosion((weasel.score/100) + 40);
@@ -802,7 +802,9 @@ $(document).ready(function () {
         }
        for(i in partObstacles){
             if(this.overlap(this, partObstacles[i])){
-                this.angle += Math.random()*720;
+			    if(!weasel.speedPower){
+                    this.angle += Math.random()*720;
+				}
 				partObstacles[i].x = Math.random() * w;
 				partObstacles[i].y = Math.random() * h;
             }
