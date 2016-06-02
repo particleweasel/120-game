@@ -17,7 +17,7 @@ $(document).ready(function () {
     //Audio variables
     var aud = new Audio("theme.mp3");
     aud.volume = 0.1;
-    var audPower = new Audio("Powerup12.wav");
+    var audPower = new Audio("win.wav");
     audPower.volume = 0.2;
     var pauseMusic = false;
 
@@ -54,6 +54,8 @@ $(document).ready(function () {
         ResumeGame: "./images/ResumeGame.png",
         WeaselOpened: "./images/WeaselOpen.png",
         WeaselClosed: "./images/WeaselClosed.png",
+        WeaselOpenedM: "./images/WeaselOpen-Magnet.png",
+        WeaselClosedM: "./images/WeaselClosed-Magnet.png",
 		WinImage:	"./images/Win.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
@@ -549,7 +551,7 @@ $(document).ready(function () {
         nextLevel.y = canvas.height/2;
         nextLevel.center();
         this.addChild(nextLevel);
-        
+
     }
 
     scoreScreen.update = function() {
@@ -914,9 +916,10 @@ $(document).ready(function () {
     weasel.score = 5000;
     weasel.scoreText = weasel.score.toString();
     weasel.closed = true;
+    weasel.closed = true;
 
     weasel.init = function() {
-        
+
         this.forcePush = false;
         this.speedPower = false;
         this.score = 0;
@@ -931,10 +934,11 @@ $(document).ready(function () {
             particle1 = this.eaten[1].type;
 
             if(particle0 == "Powerup1" || particle1 == "Powerup1"){
+                this.image.src = sources.WeaselOpenedM;
                 this.followPower = true;
                 this.score += 100;
                 followPowerTime = setTimeout(function() {setFollowFalse();}
-                                  ,5000); //3sec
+                                  ,3000); //3sec
             }
 
             if(particle0 == "Powerup3" || particle1 == "Powerup3"){
@@ -954,6 +958,15 @@ $(document).ready(function () {
 		}
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
+              if(this.followPower){
+                if(this.closedM == true){
+                  this.image.src = sources.WeaselOpenedM;
+                  this.closedM = false;
+                }else{
+                  this.image.src = sources.WeaselClosedM;
+                  this.closedM = true;
+                }
+              }else{
                 if(this.closed == true){
                   this.image.src = sources.WeaselOpened;
                   this.closed = false;
@@ -961,6 +974,8 @@ $(document).ready(function () {
                   this.image.src = sources.WeaselClosed;
                   this.closed = true;
                 }
+              }
+
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
                     this.score += 5;
