@@ -917,7 +917,7 @@ $(document).ready(function () {
     weasel.scoreText = weasel.score.toString();
     weasel.closed = true;
     weasel.closed = true;
-
+    var magID;
     weasel.init = function() {
 
         this.forcePush = false;
@@ -929,6 +929,15 @@ $(document).ready(function () {
     	ctx.font = "100px Arial";
     	ctx.fillStyle = "red";
     	ctx.fillText(this.scoreText, 50, 50);
+
+      if(this.followPower){
+        cancelAnimationFrame(animID);
+        requestAnimationFrame(weaselAnimMag);
+      }else{
+        cancelAnimationFrame(magID);
+        requestAnimationFrame(weaselAnim);
+
+      }
         if(this.eaten.length == 2){
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
@@ -958,23 +967,7 @@ $(document).ready(function () {
 		}
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
-              if(this.followPower){
-                if(this.closedM == true){
-                  this.image.src = sources.WeaselOpenedM;
-                  this.closedM = false;
-                }else{
-                  this.image.src = sources.WeaselClosedM;
-                  this.closedM = true;
-                }
-              }else{
-                if(this.closed == true){
-                  this.image.src = sources.WeaselOpened;
-                  this.closed = false;
-                }else{
-                  this.image.src = sources.WeaselClosed;
-                  this.closed = true;
-                }
-              }
+
 
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
@@ -1094,6 +1087,28 @@ $(document).ready(function () {
         console.log("Setting False");
         weasel.speedPower = false;
         clearTimeout(speedPowerTime);
+    }
+
+    function weaselAnim(){
+      animID = requestAnimationFrame(weaselAnim);
+      if(weasel.closed == true){
+        weasel.image.src = sources.WeaselOpened;
+        weasel.closed = false;
+      }else{
+        weasel.image.src = sources.WeaselClosed;
+        weasel.closed = true;
+      }
+    }
+
+    function weaselAnimMag(){
+      magID = requestAnimationFrame(weaselAnimMag);
+      if(weasel.closedM == true){
+        weasel.image.src = sources.WeaselOpenedM;
+        weasel.closedM = false;
+      }else{
+        weasel.image.src = sources.WeaselClosedM;
+        weasel.closedM = true;
+      }
     }
 //----------------------Display for collected particles----------------------
 //----------------------------------------------------------------------
