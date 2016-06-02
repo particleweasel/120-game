@@ -1,5 +1,5 @@
 /**
- * Team Particle Weasel 6/1/16 1:25PM
+ * Team Particle Weasel 6/2/16 10:33AM
  */
 $(document).ready(function () {
     //Variables for overlap()
@@ -15,9 +15,9 @@ $(document).ready(function () {
     var h = $("#canvas").height();
 
     //Audio variables
-    var aud = new Audio("theme.mp3");
+    var aud = new Audio("theme2.mp3");
     aud.volume = 0.1;
-    var audPower = new Audio("Powerup12.wav");
+    var audPower = new Audio("win.wav");
     audPower.volume = 0.2;
     var pauseMusic = false;
 
@@ -54,6 +54,8 @@ $(document).ready(function () {
         ResumeGame: "./images/ResumeGame.png",
         WeaselOpened: "./images/WeaselOpen.png",
         WeaselClosed: "./images/WeaselClosed.png",
+        WeaselOpenedM: "./images/WeaselOpen-Magnet.png",
+        WeaselClosedM: "./images/WeaselClosed-Magnet.png",
 		WinImage:	"./images/Win.png",
         Background: "./images/Background.png",
         Proton: "./images/Particle6.png",
@@ -414,6 +416,7 @@ $(document).ready(function () {
         ctx.save();
         ctx.fillStyle = "red";
         ctx.font = "48px Serif";
+        ctx.textAlign = "center";
         ctx.fillText("The Protons Love Each Other", w/2, 50);
         ctx.restore();
     }
@@ -475,6 +478,12 @@ $(document).ready(function () {
         for(i in explosion){
             explosion[i].draw();
         }
+        ctx.save();
+        ctx.fillStyle = "red";
+        ctx.font = "48px Serif";
+        ctx.textAlign = "center";
+        ctx.fillText(weasel.score, w/2, 50);
+        ctx.restore();
 
         //Display visual of eaten particle array
         /*ctx.fillRect(0, h - 50, w, h);
@@ -544,11 +553,13 @@ $(document).ready(function () {
         nextLevel.y = canvas.height/2;
         nextLevel.center();
         this.addChild(nextLevel);
+
     }
 
     scoreScreen.update = function() {
         if(clicked(this.children[0])) {
             screenMan.remove(tutScreen);
+            weasel.init();
             screenMan.push(gameScreen);
         }
         if(hasGP) {
@@ -600,7 +611,14 @@ $(document).ready(function () {
         }
 
         this.float = function() {
-            if (this.x > 0 && this.period >= 0) {
+            if (this.x < 0 || this.y < 0) {
+                for(i in partObstacles) {
+                    if (partObstacles[i] == this) {
+                        partObstacles.splice(i,1);
+                        createObstacles(1,false);
+                    }
+                }
+            } else if (this.x > 0 && this.period >= 0) {
                 this.x -= this.speed;
                 this.y += this.speed * .3;
                 this.period--;
@@ -613,13 +631,6 @@ $(document).ready(function () {
                 this.period++;
                 if (this.period == 0) {
                     this,period = 10;
-                }
-            } else {
-                for(i in partObstacles) {
-                    if (partObstacles[i] == this) {
-                        partObstacles.splice(i,1);
-                        createObstacles(1,false);
-                    }
                 }
             }
         }
@@ -805,7 +816,7 @@ $(document).ready(function () {
             audPower.play();
             protonArray = [];
             protonCount = 1;
-            weasel.init();
+            //weasel.init();
             gameScreen.children.pop();
             tutScreen.children.pop();
             screenMan.push(scoreScreen);
@@ -905,32 +916,39 @@ $(document).ready(function () {
     weasel.speedPower = false;
     weasel.angle = 0;
     weasel.score = 5000;
+    weasel.scoreText = weasel.score.toString();
+    weasel.closed = true;
     weasel.closed = true;
 
     weasel.init = function() {
-        
+
         this.forcePush = false;
         this.speedPower = false;
         this.score = 0;
     }
 
     weasel.update = function() {
+    	ctx.font = "100px Arial";
+    	ctx.fillStyle = "red";
+        //the.textAlign = "center";
+    	ctx.fillText(this.scoreText, 50, 50);
         if(this.eaten.length == 2){
             particle0 = this.eaten[0].type;
             particle1 = this.eaten[1].type;
 
             if(particle0 == "Powerup1" || particle1 == "Powerup1"){
+                this.image.src = sources.WeaselOpenedM;
                 this.followPower = true;
                 this.score += 100;
                 followPowerTime = setTimeout(function() {setFollowFalse();}
-                                  ,5000); //3sec
+                                  ,3000); //3sec
             }
 
             if(particle0 == "Powerup3" || particle1 == "Powerup3"){
                 this.forcePush = true;
                 this.score += 100;
                 pushPowerTime = setTimeout(function() {setPushFalse();}
-                                ,1500);
+                                ,2500);
             }
 
             if(particle0 == "Powerup2" || particle1 == "Powerup2"){
@@ -943,6 +961,15 @@ $(document).ready(function () {
 		}
         for(i in partObstacles){
             if(overlap(this, partObstacles[i])){
+              if(this.followPower){
+                if(this.closedM == true){
+                  this.image.src = sources.WeaselOpenedM;
+                  this.closedM = false;
+                }else{
+                  this.image.src = sources.WeaselClosedM;
+                  this.closedM = true;
+                }
+              }else{
                 if(this.closed == true){
                   this.image.src = sources.WeaselOpened;
                   this.closed = false;
@@ -950,6 +977,8 @@ $(document).ready(function () {
                   this.image.src = sources.WeaselClosed;
                   this.closed = true;
                 }
+              }
+
                 //console.log(partObstacles[i].type);
                 if(this.eaten.length < 2){
                     this.score += 5;

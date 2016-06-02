@@ -1,5 +1,5 @@
 /**
- * Team Particle Weasel 6/1/16 1:25PM
+ * Team Particle Weasel 6/2/16 10:33AM
  */
 $(document).ready(function () {
     //Variables for overlap()
@@ -15,7 +15,7 @@ $(document).ready(function () {
     var h = $("#canvas").height();
 
     //Audio variables
-    var aud = new Audio("theme.mp3");
+    var aud = new Audio("theme2.mp3");
     aud.volume = 0.1;
     var audPower = new Audio("win.wav");
     audPower.volume = 0.2;
@@ -416,6 +416,7 @@ $(document).ready(function () {
         ctx.save();
         ctx.fillStyle = "red";
         ctx.font = "48px Serif";
+        ctx.textAlign = "center";
         ctx.fillText("The Protons Love Each Other", w/2, 50);
         ctx.restore();
     }
@@ -480,6 +481,7 @@ $(document).ready(function () {
         ctx.save();
         ctx.fillStyle = "red";
         ctx.font = "48px Serif";
+        ctx.textAlign = "center";
         ctx.fillText(weasel.score, w/2, 50);
         ctx.restore();
 
@@ -609,7 +611,14 @@ $(document).ready(function () {
         }
 
         this.float = function() {
-            if (this.x > 0 && this.period >= 0) {
+            if (this.x < 0 || this.y < 0) {
+                for(i in partObstacles) {
+                    if (partObstacles[i] == this) {
+                        partObstacles.splice(i,1);
+                        createObstacles(1,false);
+                    }
+                }
+            } else if (this.x > 0 && this.period >= 0) {
                 this.x -= this.speed;
                 this.y += this.speed * .3;
                 this.period--;
@@ -622,13 +631,6 @@ $(document).ready(function () {
                 this.period++;
                 if (this.period == 0) {
                     this,period = 10;
-                }
-            } else {
-                for(i in partObstacles) {
-                    if (partObstacles[i] == this) {
-                        partObstacles.splice(i,1);
-                        createObstacles(1,false);
-                    }
                 }
             }
         }
@@ -928,6 +930,7 @@ $(document).ready(function () {
     weasel.update = function() {
     	ctx.font = "100px Arial";
     	ctx.fillStyle = "red";
+        //the.textAlign = "center";
     	ctx.fillText(this.scoreText, 50, 50);
         if(this.eaten.length == 2){
             particle0 = this.eaten[0].type;
@@ -945,7 +948,7 @@ $(document).ready(function () {
                 this.forcePush = true;
                 this.score += 100;
                 pushPowerTime = setTimeout(function() {setPushFalse();}
-                                ,1500);
+                                ,2500);
             }
 
             if(particle0 == "Powerup2" || particle1 == "Powerup2"){
