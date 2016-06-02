@@ -480,7 +480,7 @@ $(document).ready(function () {
         ctx.save();
         ctx.fillStyle = "red";
         ctx.font = "48px Serif";
-        ctx.fillText(weasel.score, w/2, 50);
+        ctx.fillText(weasel.score, w-200, 50);
         ctx.restore();
 
         //Display visual of eaten particle array
@@ -931,11 +931,11 @@ $(document).ready(function () {
     	ctx.fillText(this.scoreText, 50, 50);
 
       if(this.followPower){
-        cancelAnimationFrame(animID);
-        requestAnimationFrame(weaselAnimMag);
+        //cancelAnimationFrame(animID);
+        weaselAnimMag();
       }else{
-        cancelAnimationFrame(magID);
-        requestAnimationFrame(weaselAnim);
+        //cancelAnimationFrame(magID);
+        weaselAnim();
 
       }
         if(this.eaten.length == 2){
@@ -1090,7 +1090,8 @@ $(document).ready(function () {
     }
 
     function weaselAnim(){
-      animID = requestAnimationFrame(weaselAnim);
+      //animID = requestAnimationFrame(weaselAnim);
+      //animID;
       if(weasel.closed == true){
         weasel.image.src = sources.WeaselOpened;
         weasel.closed = false;
@@ -1101,7 +1102,8 @@ $(document).ready(function () {
     }
 
     function weaselAnimMag(){
-      magID = requestAnimationFrame(weaselAnimMag);
+      //magID = requestAnimationFrame(weaselAnimMag);
+      //magID;
       if(weasel.closedM == true){
         weasel.image.src = sources.WeaselOpenedM;
         weasel.closedM = false;
